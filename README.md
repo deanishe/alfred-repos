@@ -1,8 +1,14 @@
+title: Alfred Git Repos
+
 # Alfred Git Repos Workflow #
 
 Browse, search and open Git repositories from within Alfred.
 
-![](demo.gif "")
+![](https://raw.githubusercontent.com/deanishe/alfred-repos/master/demo.gif "")
+
+## Download ##
+
+Get the workflow from [GitHub](https://github.com/deanishe/alfred-repos/releases/latest) or Packal.
 
 ## Usage ##
 
