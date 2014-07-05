@@ -1,5 +1,3 @@
-title: Alfred Git Repos
-
 # Alfred Git Repos Workflow #
 
 Browse, search and open Git repositories from within Alfred.
