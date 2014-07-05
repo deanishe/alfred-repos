@@ -164,7 +164,7 @@
 	<key>disabled</key>
 	<false/>
 	<key>name</key>
-	<string>Repos</string>
+	<string>Git Repos</string>
 	<key>objects</key>
 	<array>
 		<dict>
@@ -435,7 +435,25 @@
 		</dict>
 	</array>
 	<key>readme</key>
-	<string></string>
+	<string>Browse, search and open Git repositories from within Alfred.
+
+You must configure your settings with `reposettings` before use.
+
+Use `reposhelp` for detailed instructions.
+
+Usage
+=====
+
+- `repos [&lt;query&gt;]` — Show a list of your Git repos filtered by `&lt;query&gt;`
+	+ `↩` — Open selected repo in `app_1`
+	+ `⌘+↩` — Open selected repo in `app_2`
+	+ `⌥+↩` — Open selected repo in `app_3`
+	+ `^+↩` — Open selected repo in `app_4`
+	+ `⇧+↩` — Open selected repo in `app_5`
+	+ `fn+↩` — Open selected repo in `app_6`
+- `reposettings` — Open `settings.json` in default JSON editor
+- `reposupdate` — Force workflow to update its cached list of repositories. (By default, the list will only be updated every 3 hours.)
+- `reposhelp` — Open this file in your browser</string>
 	<key>uidata</key>
 	<dict>
 		<key>0280D28A-796C-4B53-B165-69CFEE2AC9ED</key>
