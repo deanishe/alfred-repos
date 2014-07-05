@@ -8,24 +8,24 @@ Browse, search and open Git repositories from within Alfred.
 
 ## Download ##
 
-Get the workflow from [GitHub](https://github.com/deanishe/alfred-repos/releases/latest) or Packal.
+Get the workflow from [GitHub](https://github.com/deanishe/alfred-repos/releases/latest) or [Packal](http://www.packal.org/workflow/git-repos).
 
 ## Usage ##
 
-This workflow requires some configuration before use. See [Configuration][configuration] for details.
+This workflow requires some configuration before use. See [Configuration](#configuration) for details.
 
 - `repos [<query>]` — Show a list of your Git repos filtered by `<query>`
-	+ `↩` — Open selected repo in `app_1` (see [configuration][configuration])
-	+ `⌘+↩` — Open selected repo in `app_2` (see [configuration][configuration])
-	+ `⌥+↩` — Open selected repo in `app_3` (requires [configuration][configuration])
-	+ `^+↩` — Open selected repo in `app_4` (requires [configuration][configuration])
-	+ `⇧+↩` — Open selected repo in `app_5` (requires [configuration][configuration])
-	+ `fn+↩` — Open selected repo in `app_6` (requires [configuration][configuration])
+	+ `↩` — Open selected repo in `app_1` (see [configuration](#configuration))
+	+ `⌘+↩` — Open selected repo in `app_2` (see [configuration](#configuration))
+	+ `⌥+↩` — Open selected repo in `app_3` (requires [configuration](#configuration))
+	+ `^+↩` — Open selected repo in `app_4` (requires [configuration](#configuration))
+	+ `⇧+↩` — Open selected repo in `app_5` (requires [configuration](#configuration))
+	+ `fn+↩` — Open selected repo in `app_6` (requires [configuration](#configuration))
 - `reposettings` — Open `settings.json` in default JSON editor
 - `reposupdate` — Force workflow to update its cached list of repositories. (By default, the list will only be updated every 3 hours.)
 - `reposhelp` — Open this file in your browser
 
-## Configuration [configuration] ##
+## Configuration ##
 
 Before you can use this workflow, you have to configure one or more folders in which the workflow should search for Git repos. The workflow uses `find` to search for `.git` directories, so you shouldn't add *huge* directory trees to it, and use the `depth` option to restrict the search depth. Typically, a `depth` of `2` will be what you want (i.e. search within subdirectories of specified directory, but no lower). Add directories to search to the `search_dir` array in `settings.json` (see below).
 

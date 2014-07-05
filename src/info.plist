@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>bundleid</key>
-	<string>net.deanishe.alfred-repos</string>
+	<string>net.deanishe.alfred-git-repos</string>
 	<key>connections</key>
 	<dict>
 		<key>0280D28A-796C-4B53-B165-69CFEE2AC9ED</key>
