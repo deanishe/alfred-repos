@@ -1,6 +1,3 @@
-title: Alfred Git Repos Workflow
-author: Dean Jackson <deanishe@deanishe.net>
-date: 2014-07-07
 
 # Alfred Git Repos Workflow #
 
