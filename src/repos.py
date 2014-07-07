@@ -37,6 +37,8 @@ import subprocess
 from workflow import Workflow, ICON_WARNING, ICON_INFO
 from workflow.background import is_running, run_in_background
 
+__version__ = '1.1'
+
 
 UPDATE_INTERVAL = 3600 * 3  # 3 hours
 
@@ -60,6 +62,18 @@ DEFAULT_SETTINGS = {
 log = None
 
 
+def join_english(items):
+    """Join a list of unicode objects with commas and/or 'and'"""
+    if isinstance(items, unicode):
+        return items
+    if len(items) == 1:
+        return '{}'.format(items[0])
+    elif len(items) == 2:
+        return ' and '.join(items)
+    last = items.pop()
+    return ', '.join(items) + ' and {}'.format(last)
+
+
 def main(wf):
     from docopt import docopt
 
@@ -81,7 +95,7 @@ def main(wf):
         appnum = int(appnum)
 
     apps = {}
-    for i in range(1, 6):
+    for i in range(1, 7):
         apps[i] = wf.settings.get('app_{}'.format(i))
 
     if not apps.get(1):  # Things will break if this isn't set
@@ -95,7 +109,10 @@ def main(wf):
             print('App {} not set. Use `reposettings`'.format(appnum))
             return 0
         else:
-            subprocess.call(['open', '-a', app, path])
+            if not isinstance(app, list):
+                app = [app]
+            for a in app:
+                subprocess.call(['open', '-a', a, path])
             return 0
 
     elif args.get('--edit'):
@@ -150,7 +167,7 @@ def main(wf):
             modifier_subtitles[mod] = (
                 'App {} not set. Use `reposettings` to set it.'.format(i))
         else:
-            modifier_subtitles[mod] = 'Open in {}'.format(apps[i])
+            modifier_subtitles[mod] = 'Open in {}'.format(join_english(apps[i]))
         i += 1
 
     if query:
@@ -162,8 +179,10 @@ def main(wf):
         wf.add_item('No matching repos found', icon=ICON_WARNING)
 
     for path in repos:
+        subtitle = (path.replace(os.environ['HOME'], '~') +
+                    '  //  Open in {}'.format(join_english(apps[1])))
         wf.add_item(os.path.basename(path),
-                    path.replace(os.environ['HOME'], '~'),
+                    subtitle,
                     modifier_subtitles=modifier_subtitles,
                     arg=path,
                     valid=True,
