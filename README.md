@@ -1,3 +1,7 @@
+title: Alfred Git Repos Workflow
+author: Dean Jackson <deanishe@deanishe.net>
+date: 2014-07-07
+
 # Alfred Git Repos Workflow #
 
 Browse, search and open Git repositories from within Alfred.
@@ -31,12 +35,12 @@ The default `settings.json` file looks like this:
 
 ```
 {
-  "app_1": "Finder",             // ↩ to open in this app
-  "app_2": "Terminal",           // ⌘+↩ to open in this app
-  "app_3": null,                 // ⌥+↩ to open in this app
-  "app_4": null,                 // ^+↩ to open in this app
-  "app_5": null,                 // ⇧+↩ to open in this app
-  "app_6": null,                 // fn+↩ to open in this app
+  "app_1": "Finder",             // ↩ to open in this/these app(s)
+  "app_2": "Terminal",           // ⌘+↩ to open in this/these app(s)
+  "app_3": null,                 // ⌥+↩ to open in this/these app(s)
+  "app_4": null,                 // ^+↩ to open in this/these app(s)
+  "app_5": null,                 // ⇧+↩ to open in this/these app(s)
+  "app_6": null,                 // fn+↩ to open in this/these app(s)
   "global_exclude_patterns": [],      // Exclude from all searches
   "search_dirs": [
     {
@@ -56,11 +60,11 @@ This is my `settings.json`:
 ```
 {
   "app_1": "Finder",
-  "app_2": "Sublime Text",
-  "app_3": "SourceTree",
-  "app_4": "iTerm",
-  "app_5": "GitHub",
-  "app_6": null,
+  "app_2": ["Finder", "Sublime Text", "SourceTree", "iTerm"],
+  "app_3": "Sublime Text",
+  "app_4": "SourceTree",
+  "app_5": "iTerm",
+  "app_6": "GitHub",
   "global_exclude_patterns": [],
   "search_dirs": [
     {
@@ -82,6 +86,14 @@ Only `path` is required. `depth` will default to `2` if not specified. `excludes
 ### Open in Applications ###
 
 The applications specified by the `app_N` options are all called using `open -a AppName path/to/directory`. You can configure any application that can open a directory in this manner. Some recommendations are Sublime Text, SourceTree, GitHub or iTerm.
+
+**Note:** As you can see from my `settings.json`, you can also set an `app_N` value to a list of applications to open the selected repo in more than one app at once:
+
+```
+…
+  "app_2": ["Finder", "Sublime Text", "SourceTree", "iTerm"],
+…
+```
 
 You can also use `→` on a result to access Alfred's default File Actions menu.
 

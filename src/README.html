@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
-  <title>Alfred Git Repos</title>
+  <title>Alfred Git Repos Workflow</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
 /*
@@ -820,12 +820,12 @@ github.com style (c) Vasily Polovnyov <vast@whiteants.net>
 <p>The default <code>settings.json</code> file looks like this:</p>
 
 <pre><code>{
-  &quot;app_1&quot;: &quot;Finder&quot;,             // ↩ to open in this app
-  &quot;app_2&quot;: &quot;Terminal&quot;,           // ⌘+↩ to open in this app
-  &quot;app_3&quot;: null,                 // ⌥+↩ to open in this app
-  &quot;app_4&quot;: null,                 // ^+↩ to open in this app
-  &quot;app_5&quot;: null,                 // ⇧+↩ to open in this app
-  &quot;app_6&quot;: null,                 // fn+↩ to open in this app
+  &quot;app_1&quot;: &quot;Finder&quot;,             // ↩ to open in this/these app(s)
+  &quot;app_2&quot;: &quot;Terminal&quot;,           // ⌘+↩ to open in this/these app(s)
+  &quot;app_3&quot;: null,                 // ⌥+↩ to open in this/these app(s)
+  &quot;app_4&quot;: null,                 // ^+↩ to open in this/these app(s)
+  &quot;app_5&quot;: null,                 // ⇧+↩ to open in this/these app(s)
+  &quot;app_6&quot;: null,                 // fn+↩ to open in this/these app(s)
   &quot;global_exclude_patterns&quot;: [],      // Exclude from all searches
   &quot;search_dirs&quot;: [
     {
@@ -843,11 +843,11 @@ github.com style (c) Vasily Polovnyov <vast@whiteants.net>
 
 <pre><code>{
   &quot;app_1&quot;: &quot;Finder&quot;,
-  &quot;app_2&quot;: &quot;Sublime Text&quot;,
-  &quot;app_3&quot;: &quot;SourceTree&quot;,
-  &quot;app_4&quot;: &quot;iTerm&quot;,
-  &quot;app_5&quot;: &quot;GitHub&quot;,
-  &quot;app_6&quot;: null,
+  &quot;app_2&quot;: [&quot;Finder&quot;, &quot;Sublime Text&quot;, &quot;SourceTree&quot;, &quot;iTerm&quot;],
+  &quot;app_3&quot;: &quot;Sublime Text&quot;,
+  &quot;app_4&quot;: &quot;SourceTree&quot;,
+  &quot;app_5&quot;: &quot;iTerm&quot;,
+  &quot;app_6&quot;: &quot;GitHub&quot;,
   &quot;global_exclude_patterns&quot;: [],
   &quot;search_dirs&quot;: [
     {
@@ -868,6 +868,12 @@ github.com style (c) Vasily Polovnyov <vast@whiteants.net>
 <h3 id="openinapplications">Open in Applications</h3>
 
 <p>The applications specified by the <code>app_N</code> options are all called using <code>open -a AppName path/to/directory</code>. You can configure any application that can open a directory in this manner. Some recommendations are Sublime Text, SourceTree, GitHub or iTerm.</p>
+
+<p><strong>Note:</strong> As you can see from my <code>settings.json</code>, you can also set an <code>app_N</code> value to a list of applications to open the selected repo in more than one app at once:</p>
+
+<pre><code>…
+  &quot;app_2&quot;: [&quot;Finder&quot;, &quot;Sublime Text&quot;, &quot;SourceTree&quot;, &quot;iTerm&quot;],
+…</code></pre>
 
 <p>You can also use <code>→</code> on a result to access Alfred&#8217;s default File Actions menu.</p>
 
