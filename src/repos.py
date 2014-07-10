@@ -47,6 +47,7 @@ DEFAULT_SETTINGS = {
     'search_dirs': [{
         'path': '~/delete/this/example',
         'depth': 2,
+        'name_for_parent': 1,
         'excludes': ['tmp', 'bad/smell/*']
     }],
     'global_exclude_patterns': [],
@@ -156,6 +157,16 @@ def main(wf):
         wf.send_feedback()
         return 0
 
+    # Check if cached data is old version
+    #-------------------------------------------------------------------
+    if isinstance(repos[0], basestring):
+        run_in_background('update', ['/usr/bin/python', 'update.py'])
+        wf.add_item('Updating format of repos database…',
+                    'Should be done in a few seconds',
+                    icon=ICON_INFO)
+        wf.send_feedback()
+        return 0
+
     # Perform search and send results to Alfred
     #-------------------------------------------------------------------
 
@@ -172,16 +183,16 @@ def main(wf):
 
     if query:
         repos = wf.filter(query, repos,
-                          lambda p: os.path.basename(p),
+                          lambda t: t[0],
                           min_score=30)
 
     if not repos:
         wf.add_item('No matching repos found', icon=ICON_WARNING)
 
-    for path in repos:
+    for name, path in repos:
         subtitle = (path.replace(os.environ['HOME'], '~') +
                     '  //  Open in {}'.format(join_english(apps[1])))
-        wf.add_item(os.path.basename(path),
+        wf.add_item(name,
                     subtitle,
                     modifier_subtitles=modifier_subtitles,
                     arg=path,

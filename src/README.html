@@ -809,7 +809,7 @@ github.com style (c) Vasily Polovnyov <vast@whiteants.net>
 <li><code>fn+↩</code> — Open selected repo in <code>app_6</code> (requires <a href="#configuration">configuration</a>)</li>
 </ul></li>
 <li><code>reposettings</code> — Open <code>settings.json</code> in default JSON editor</li>
-<li><code>reposupdate</code> — Force workflow to update its cached list of repositories. (By default, the list will only be updated every 3 hours.)</li>
+<li><code>reposupdate</code> — Force workflow to update its cached list of repositories. (By default, the list will only be updated—in the background—every 3 hours.)</li>
 <li><code>reposhelp</code> — Open this file in your browser</li>
 </ul>
 
@@ -831,6 +831,7 @@ github.com style (c) Vasily Polovnyov <vast@whiteants.net>
     {
       &quot;path&quot;: &quot;~/delete/this/example&quot;,   // Path to search. ~/ is expanded
       &quot;depth&quot;: 2,                        // Search subdirs of `path`
+      &quot;name_for_parent&quot;: 1,              // Name Alfred entry after parent of `.git`. 2 = grandparent of `.git` etc.
       &quot;excludes&quot;: [                      // Excludes specific to this path
         &quot;tmp&quot;,                           // Directories named `tmp`
         &quot;bad/smell/*&quot;                    // Subdirs of `bad/smell` directory
@@ -864,6 +865,22 @@ github.com style (c) Vasily Polovnyov <vast@whiteants.net>
 <p>Each entry in the <code>search_dirs</code> list must be a mapping.</p>
 
 <p>Only <code>path</code> is required. <code>depth</code> will default to <code>2</code> if not specified. <code>excludes</code> are globbing patterns, like in <code>.gitignore</code>.</p>
+
+<p><code>name_for_parent</code> defaults to <code>1</code>, which means the entry in Alfred&#8217;s results should be named after the directory containing the <code>.git</code> directory. If you want Alfred to show the name of the grandparent, set <code>name_for_parent</code> to <code>2</code> etc.</p>
+
+<p>This is useful if your projects are structured, for example, like this and <code>src</code> is the actual repo:</p>
+
+<pre><code>Code
+  Project_1
+    src
+    other_stuff
+  Project_2
+    src
+    other_stuff
+  …
+  …</code></pre>
+
+<p>Set <code>name_for_parent</code> to <code>2</code>, and <code>Project_1</code>, <code>Project_2</code> etc. will be shown in Alfred, not <code>src</code>, <code>src</code>, <code>src</code>…</p>
 
 <h3 id="openinapplications">Open in Applications</h3>
 
