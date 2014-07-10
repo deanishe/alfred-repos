@@ -21,7 +21,7 @@ This workflow requires some configuration before use. See [Configuration](#confi
 	+ `⇧+↩` — Open selected repo in `app_5` (requires [configuration](#configuration))
 	+ `fn+↩` — Open selected repo in `app_6` (requires [configuration](#configuration))
 - `reposettings` — Open `settings.json` in default JSON editor
-- `reposupdate` — Force workflow to update its cached list of repositories. (By default, the list will only be updated every 3 hours.)
+- `reposupdate` — Force workflow to update its cached list of repositories. (By default, the list will only be updated—in the background—every 3 hours.)
 - `reposhelp` — Open this file in your browser
 
 ## Configuration ##
@@ -43,6 +43,7 @@ The default `settings.json` file looks like this:
     {
       "path": "~/delete/this/example",   // Path to search. ~/ is expanded
       "depth": 2,                        // Search subdirs of `path`
+      "name_for_parent": 1,              // Name Alfred entry after parent of `.git`. 2 = grandparent of `.git` etc.
       "excludes": [                      // Excludes specific to this path
         "tmp",                           // Directories named `tmp`
         "bad/smell/*"                    // Subdirs of `bad/smell` directory
@@ -79,6 +80,24 @@ This is my `settings.json`:
 Each entry in the `search_dirs` list must be a mapping.
 
 Only `path` is required. `depth` will default to `2` if not specified. `excludes` are globbing patterns, like in `.gitignore`.
+
+`name_for_parent` defaults to `1`, which means the entry in Alfred's results should be named after the directory containing the `.git` directory. If you want Alfred to show the name of the grandparent, set `name_for_parent` to `2` etc.
+
+This is useful if your projects are structured, for example, like this and `src` is the actual repo:
+
+```
+Code
+  Project_1
+    src
+    other_stuff
+  Project_2
+    src
+    other_stuff
+  …
+  …
+```
+
+Set `name_for_parent` to `2`, and `Project_1`, `Project_2` etc. will be shown in Alfred, not `src`, `src`, `src`…
 
 ### Open in Applications ###
 

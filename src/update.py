@@ -37,13 +37,16 @@ log = None
 decode = None
 
 
-def find_git_repos(dirpath, excludes, depth):
+def find_git_repos(dirpath, excludes, depth, name_for_parent=1):
     """Return list of directories containing a `.git` directory
 
     Results matching globbing patterns in `excludes` will be ignored.
 
     `depth` is how many directories deep to search (2 is the minimum in
     most situations).
+
+    `name_for_parent` is which level of the directory hierarchy to name
+    the repo after relative to `.git` (1=immediate parent, 2=grandparent)
 
     """
 
@@ -69,7 +72,23 @@ def find_git_repos(dirpath, excludes, depth):
         if ignore:
             continue
 
-        results.append(filepath)
+        # Work out name for repo
+        if name_for_parent < 2:  # ignore 0, it's pointless
+            name = os.path.basename(filepath)
+        else:
+            components = filepath.rstrip('/').split('/')
+            if name_for_parent >= len(components):
+                log.error(
+                    ('{} : `name_for_parent` is {}, '
+                     'only {} levels in file tree'
+                     ).format(filepath, name_for_parent, len(components)))
+                name = os.path.basename(filepath)
+            else:
+                name = components[-(name_for_parent)]
+
+        log.debug('repo `{}` at `{}`'.format(name, filepath))
+        results.append((name, filepath))
+
     log.debug('{} repos found in `{}` in {:0.2f} s'.format(len(results),
                                                            dirpath,
                                                            time() - start))
@@ -97,13 +116,14 @@ def main(wf):
         dirpath = os.path.expanduser(data['path'])
         depth = data.get('depth', DEFAULT_DEPTH)
         excludes = data.get('excludes', []) + global_excludes
+        name_for_parent = data.get('name_for_parent', 1)
 
         if not os.path.exists(dirpath):
             log.error('Directory does not exist: {}'.format(dirpath))
             continue
 
         r = pool.apply_async(find_git_repos,
-                             (dirpath, excludes, depth))
+                             (dirpath, excludes, depth, name_for_parent))
         result_objs.append(r)
 
     # Close the pool and wait for it to finish
@@ -118,6 +138,7 @@ def main(wf):
 
     log.info('{} repos found in {:0.2f} s'.format(len(repos), time() - start))
     log.info('Update finished')
+    [h.flush() for h in log.handlers]
 
     return 0
 
