@@ -52,7 +52,7 @@ def find_git_repos(dirpath, excludes, depth, name_for_parent=1):
 
     start = time()
 
-    cmd = ['find', dirpath,
+    cmd = ['find', '-L', dirpath,
            '-type', 'd',
            '-name', '.git',
            '-depth', str(depth)]
