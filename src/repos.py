@@ -196,6 +196,7 @@ def main(wf):
                     subtitle,
                     modifier_subtitles=modifier_subtitles,
                     arg=path,
+                    uid=path,
                     valid=True,
                     type='file',
                     icon='icon.png')
