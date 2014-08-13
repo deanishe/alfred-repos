@@ -55,7 +55,7 @@ def find_git_repos(dirpath, excludes, depth, name_for_parent=1):
     cmd = ['find', '-L', dirpath,
            '-type', 'd',
            '-name', '.git',
-           '-depth', str(depth)]
+           '-maxdepth', str(depth)]
 
     output = subprocess.check_output(cmd)
     output = [os.path.dirname(s.strip()) for s in decode(output).split('\n')
