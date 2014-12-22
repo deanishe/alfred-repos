@@ -40,7 +40,17 @@ from workflow.background import is_running, run_in_background
 __version__ = '1.1'
 
 
+# How often to check for new/updated repos
 UPDATE_INTERVAL = 3600 * 3  # 3 hours
+
+# GitHub repo for self-updating
+GITHUB_UPDATE_CONF = {'github_slug': 'deanishe/alfred-repos'}
+
+# GitHub Issues
+HELP_URL = 'https://github.com/deanishe/alfred-repos/issues'
+
+# Icon shown if a newer version is available
+ICON_UPDATE = 'update-available.png'
 
 
 DEFAULT_SETTINGS = {
@@ -77,11 +87,6 @@ def join_english(items):
 
 def main(wf):
     from docopt import docopt
-
-    # Create settings file with default settings if it doesn't exist
-    if not os.path.exists(wf.settings_path):
-        for key in DEFAULT_SETTINGS:
-            wf.settings[key] = DEFAULT_SETTINGS[key]
 
     # Handle arguments
     # ------------------------------------------------------------------
@@ -123,6 +128,15 @@ def main(wf):
     elif args.get('--update'):
         run_in_background('update', ['/usr/bin/python', 'update.py'])
         return 0
+
+    # Notify user if update is available
+    # ------------------------------------------------------------------
+    if wf.update_available:
+        v = wf.cached_data('__workflow_update_status', max_age=0)['version']
+        log.info('Newer version ({}) is available'.format(v))
+        wf.add_item('Version {} is available'.format(v),
+                    'Use `workflow:update` to install',
+                    icon=ICON_UPDATE)
 
     # Try to search git repos
     # ------------------------------------------------------------------
@@ -213,6 +227,8 @@ def main(wf):
 
 
 if __name__ == '__main__':
-    wf = Workflow()
+    wf = Workflow(default_settings=DEFAULT_SETTINGS,
+                  update_settings=GITHUB_UPDATE_CONF,
+                  help_url=HELP_URL)
     log = wf.logger
     sys.exit(wf.run(main))
