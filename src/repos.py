@@ -84,7 +84,7 @@ def main(wf):
             wf.settings[key] = DEFAULT_SETTINGS[key]
 
     # Handle arguments
-    #-------------------------------------------------------------------
+    # ------------------------------------------------------------------
     args = docopt(__doc__, wf.args)
 
     log.debug('args: {}'.format(args))
@@ -103,7 +103,7 @@ def main(wf):
         apps[1] = 'Finder'
 
     # Alternate actions
-    #-------------------------------------------------------------------
+    # ------------------------------------------------------------------
     if appnum and path:
         app = apps.get(appnum)
         if app is None:
@@ -125,10 +125,10 @@ def main(wf):
         return 0
 
     # Try to search git repos
-    #-------------------------------------------------------------------
+    # ------------------------------------------------------------------
     search_dirs = wf.settings.get('search_dirs', [])
 
-    # Can't do anything with not directories to search
+    # Can't do anything with no directories to search
     if not search_dirs or wf.settings == DEFAULT_SETTINGS:
         wf.add_item("You haven't configured any directories to search",
                     'Use `reposettings` to edit your configuration',
@@ -144,7 +144,7 @@ def main(wf):
 
     # Show appropriate warning/info message if there are no repos to
     # show/search
-    #-------------------------------------------------------------------
+    # ------------------------------------------------------------------
     if not repos:
         if is_running('update'):
             wf.add_item('Initialising database of repos…',
@@ -158,7 +158,7 @@ def main(wf):
         return 0
 
     # Check if cached data is old version
-    #-------------------------------------------------------------------
+    # ------------------------------------------------------------------
     if isinstance(repos[0], basestring):
         run_in_background('update', ['/usr/bin/python', 'update.py'])
         wf.add_item('Updating format of repos database…',
@@ -168,7 +168,7 @@ def main(wf):
         return 0
 
     # Perform search and send results to Alfred
-    #-------------------------------------------------------------------
+    # ------------------------------------------------------------------
 
     # Set modifier subtitles
     modifier_subtitles = {}
@@ -181,15 +181,22 @@ def main(wf):
             modifier_subtitles[mod] = 'Open in {}'.format(join_english(apps[i]))
         i += 1
 
+    # Total number of repos
+    repo_count = len(repos)
+
     if query:
         repos = wf.filter(query, repos,
                           lambda t: t[0],
                           min_score=30)
+        log.debug('{}/{} repos matching `{}`'.format(len(repos),
+                                                     repo_count,
+                                                     query))
 
     if not repos:
         wf.add_item('No matching repos found', icon=ICON_WARNING)
 
     for name, path in repos:
+        log.debug('`{}` @ `{}`'.format(name, path))
         subtitle = (path.replace(os.environ['HOME'], '~') +
                     '  //  Open in {}'.format(join_english(apps[1])))
         wf.add_item(name,
