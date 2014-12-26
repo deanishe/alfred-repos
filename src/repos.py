@@ -102,7 +102,10 @@ def main(wf):
 
     apps = {}
     for i in range(1, 7):
-        apps[i] = wf.settings.get('app_{}'.format(i))
+        app = wf.settings.get('app_{}'.format(i))
+        if isinstance(app, list):
+            app = app[:]
+        apps[i] = app
 
     if not apps.get(1):  # Things will break if this isn't set
         apps[1] = 'Finder'

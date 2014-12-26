@@ -734,13 +734,20 @@ class Item(object):
 
         """
 
+        # Attributes on <item> element
         attr = {}
         if self.valid:
             attr['valid'] = 'yes'
         else:
             attr['valid'] = 'no'
+        # Allow empty string for autocomplete. This is a useful value,
+        # as TABing the result will revert the query back to just the
+        # keyword
+        if self.autocomplete is not None:
+            attr['autocomplete'] = self.autocomplete
+
         # Optional attributes
-        for name in ('uid', 'type', 'autocomplete'):
+        for name in ('uid', 'type'):
             value = getattr(self, name, None)
             if value:
                 attr[name] = value
@@ -748,14 +755,18 @@ class Item(object):
         root = ET.Element('item', attr)
         ET.SubElement(root, 'title').text = self.title
         ET.SubElement(root, 'subtitle').text = self.subtitle
+
         # Add modifier subtitles
         for mod in ('cmd', 'ctrl', 'alt', 'shift', 'fn'):
             if mod in self.modifier_subtitles:
                 ET.SubElement(root, 'subtitle',
                               {'mod': mod}).text = self.modifier_subtitles[mod]
 
+        # Add arg as element instead of attribute on <item>, as it's more
+        # flexible (newlines aren't allowed in attributes)
         if self.arg:
             ET.SubElement(root, 'arg').text = self.arg
+
         # Add icon if there is one
         if self.icon:
             if self.icontype:
@@ -939,9 +950,6 @@ class Workflow(object):
 
         if libraries:
             sys.path = libraries + sys.path
-
-        if update_settings:
-            self.check_update()
 
     ####################################################################
     # API methods
@@ -1374,6 +1382,8 @@ class Workflow(object):
         """
 
         if not self._settings:
+            self.logger.debug('Reading settings from `{}` ...'.format(
+                              self.settings_path))
             self._settings = Settings(self.settings_path,
                                       self._default_settings)
         return self._settings
@@ -1535,9 +1545,17 @@ class Workflow(object):
 
         serializer_name = serializer or self.data_serializer
 
-        if serializer_name == 'json' and name == 'settings':
+        # In order for `stored_data()` to be able to load data stored with
+        # an arbitrary serializer, yet still have meaningful file extensions,
+        # the format (i.e. extension) is saved to an accompanying file
+        metadata_path = self.datafile('.{}.alfred-workflow'.format(name))
+        filename = '{}.{}'.format(name, serializer_name)
+        data_path = self.datafile(filename)
+
+        if data_path == self.settings_path:
             raise ValueError(
-                'Cannot save data to `settings` with format `json`. '
+                'Cannot save data to' +
+                '`{}` with format `{}`. '.format(name, serializer_name) +
                 "This would overwrite Alfred-Workflow's settings file.")
 
         serializer = manager.serializer(serializer_name)
@@ -1546,13 +1564,6 @@ class Workflow(object):
             raise ValueError(
                 'Invalid serializer `{}`. Register your serializer with '
                 '`manager.register()` first.'.format(serializer_name))
-
-        # In order for `stored_data()` to be able to load data stored with
-        # an arbitrary serializer, yet still have meaningful file extensions,
-        # the format (i.e. extension) is saved to an accompanying file
-        metadata_path = self.datafile('.{}.alfred-workflow'.format(name))
-        filename = '{}.{}'.format(name, serializer_name)
-        data_path = self.datafile(filename)
 
         if data is None:  # Delete cached data
             for path in (metadata_path, data_path):
@@ -1930,7 +1941,9 @@ class Workflow(object):
         :param func: Callable to call with ``self`` (i.e. the :class:`Workflow`
             instance) as first argument.
 
-        ``func`` will be called with :class:`Workflow` instance as first argument.
+        ``func`` will be called with :class:`Workflow` instance as first
+        argument.
+
         ``func`` should be the main entry point to your workflow.
 
         Any exceptions raised will be logged and an error message will be
@@ -1940,13 +1953,27 @@ class Workflow(object):
 
         start = time.time()
 
+        # Call workflow's entry function/method within a try-except block
+        # to catch any errors and display an error message in Alfred
         try:
             if self.version:
                 self.logger.debug('Workflow version : {}'.format(self.version))
+
+            # Run update check if configured for self-updates.
+            # This call has to go in the `run` try-except block, as it will
+            # initialise `self.settings`, which will raise an exception
+            # if `settings.json` isn't valid.
+
+            if self._update_settings:
+                self.check_update()
+
+            # Run workflow's entry function/method
             func(self)
+
             # Set last version run to current version after a successful
             # run
             self.set_last_version()
+
         except Exception as err:
             self.logger.exception(err)
             if self.help_url:
