@@ -37,8 +37,6 @@ import subprocess
 from workflow import Workflow, ICON_WARNING, ICON_INFO
 from workflow.background import is_running, run_in_background
 
-__version__ = '1.1'
-
 
 # How often to check for new/updated repos
 UPDATE_INTERVAL = 3600 * 3  # 3 hours
