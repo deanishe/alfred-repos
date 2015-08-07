@@ -33,6 +33,7 @@ from __future__ import print_function, unicode_literals
 import sys
 import os
 import subprocess
+import re
 
 from workflow import Workflow, ICON_WARNING, ICON_INFO
 from workflow.background import is_running, run_in_background
@@ -119,7 +120,12 @@ def main(wf):
             if not isinstance(app, list):
                 app = [app]
             for a in app:
-                subprocess.call(['open', '-a', a, path])
+                if (a == 'Google Chrome' or a == 'Firefox' or a == 'Safari'):
+                    url = subprocess.check_output(['git','config','remote.origin.url'], cwd=path)
+                    url = re.sub(r'https://.+@','https://',url).strip()
+                    subprocess.call(['open', '-a', a, url])
+                else:
+                    subprocess.call(['open', '-a', a, path])
             return 0
 
     elif args.get('--edit'):
