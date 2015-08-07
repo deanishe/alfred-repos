@@ -75,6 +75,8 @@ This is my `settings.json`:
 }
 ```
 
+**Note:** If you specify `Safari`, `Google Chrome` or `Firefox` as an application, it will be passed the remote repo URL, not the local filepath.
+
 ### Search Directories ###
 
 Each entry in the `search_dirs` list must be a mapping.

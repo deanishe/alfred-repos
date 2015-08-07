@@ -51,6 +51,15 @@ HELP_URL = 'https://github.com/deanishe/alfred-repos/issues'
 # Icon shown if a newer version is available
 ICON_UPDATE = 'update-available.png'
 
+# These apps will be passed the remote repo URL instead
+# of the local directory path
+BROWSERS = [
+    'Google Chrome',
+    'Firefox',
+    'Safari',
+    'WebKit',
+
+]
 
 DEFAULT_SETTINGS = {
     'search_dirs': [{
@@ -85,6 +94,7 @@ def join_english(items):
 
 
 def main(wf):
+    """Run the workflow."""
     from docopt import docopt
 
     # Handle arguments
@@ -120,10 +130,14 @@ def main(wf):
             if not isinstance(app, list):
                 app = [app]
             for a in app:
-                if (a == 'Google Chrome' or a == 'Firefox' or a == 'Safari'):
-                    url = subprocess.check_output(['git','config','remote.origin.url'], cwd=path)
-                    url = re.sub(r'https://.+@','https://',url).strip()
+                if a in BROWSERS:
+                    url = subprocess.check_output(
+                        ['git', 'config', 'remote.origin.url'],
+                        cwd=path
+                    )
+                    url = re.sub(r'https://.+@', 'https://', url).strip()
                     subprocess.call(['open', '-a', a, url])
+
                 else:
                     subprocess.call(['open', '-a', a, path])
             return 0
