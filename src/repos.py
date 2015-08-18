@@ -92,6 +92,11 @@ def join_english(items):
     last = items.pop()
     return ', '.join(items) + ' and {}'.format(last)
 
+def convertSSHUrlIntoHttpsIfNeeded(url):
+    url = url.replace(':','/')
+    url = 'https://' + url[4:len(url)]
+    return url
+
 
 def main(wf):
     """Run the workflow."""
@@ -136,6 +141,8 @@ def main(wf):
                         cwd=path
                     )
                     url = re.sub(r'https://.+@', 'https://', url).strip()
+                    url = convertSSHUrlIntoHttpsIfNeeded(url)
+
                     subprocess.call(['open', '-a', a, url])
 
                 else:
