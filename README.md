@@ -28,6 +28,8 @@ This workflow requires some configuration before use. See [Configuration](#confi
 
 Before you can use this workflow, you have to configure one or more folders in which the workflow should search for Git repos. The workflow uses `find` to search for `.git` directories, so you shouldn't add *huge* directory trees to it, and use the `depth` option to restrict the search depth. Typically, a `depth` of `2` will be what you want (i.e. search within subdirectories of specified directory, but no lower). Add directories to search to the `search_dir` array in `settings.json` (see below).
 
+**Note:** After (re-)configuration, run `reposupdate` to (re-)initialise the list of repos.
+
 The default `settings.json` file looks like this:
 
 ```
