@@ -33,11 +33,10 @@ from __future__ import print_function, unicode_literals
 import sys
 import os
 import subprocess
+import re
 
 from workflow import Workflow, ICON_WARNING, ICON_INFO
 from workflow.background import is_running, run_in_background
-
-__version__ = '1.1'
 
 
 # How often to check for new/updated repos
@@ -52,6 +51,15 @@ HELP_URL = 'https://github.com/deanishe/alfred-repos/issues'
 # Icon shown if a newer version is available
 ICON_UPDATE = 'update-available.png'
 
+# These apps will be passed the remote repo URL instead
+# of the local directory path
+BROWSERS = [
+    'Google Chrome',
+    'Firefox',
+    'Safari',
+    'WebKit',
+
+]
 
 DEFAULT_SETTINGS = {
     'search_dirs': [{
@@ -86,6 +94,7 @@ def join_english(items):
 
 
 def main(wf):
+    """Run the workflow."""
     from docopt import docopt
 
     # Handle arguments
@@ -102,7 +111,10 @@ def main(wf):
 
     apps = {}
     for i in range(1, 7):
-        apps[i] = wf.settings.get('app_{}'.format(i))
+        app = wf.settings.get('app_{}'.format(i))
+        if isinstance(app, list):
+            app = app[:]
+        apps[i] = app
 
     if not apps.get(1):  # Things will break if this isn't set
         apps[1] = 'Finder'
@@ -118,7 +130,16 @@ def main(wf):
             if not isinstance(app, list):
                 app = [app]
             for a in app:
-                subprocess.call(['open', '-a', a, path])
+                if a in BROWSERS:
+                    url = subprocess.check_output(
+                        ['git', 'config', 'remote.origin.url'],
+                        cwd=path
+                    )
+                    url = re.sub(r'https://.+@', 'https://', url).strip()
+                    subprocess.call(['open', '-a', a, url])
+
+                else:
+                    subprocess.call(['open', '-a', a, path])
             return 0
 
     elif args.get('--edit'):
