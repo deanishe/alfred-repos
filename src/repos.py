@@ -135,7 +135,8 @@ def main(wf):
                         ['git', 'config', 'remote.origin.url'],
                         cwd=path
                     )
-                    url = re.sub(r'https://.+@', 'https://', url).strip()
+                    url = re.sub(r'(^.+@)|(^https://)|(^git://)|(.git$)','',url)
+                    url = "https://" + re.sub(r':','/',url).strip()
                     subprocess.call(['open', '-a', a, url])
 
                 else:
