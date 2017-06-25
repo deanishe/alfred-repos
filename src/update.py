@@ -8,9 +8,9 @@
 # Created on 2014-07-04
 #
 
-"""
-Update the cache of git repositories based on the settings in the workflow's
-`settings.json` file.
+"""Update the cache of git repositories.
+
+Uses settings from the workflow's `settings.json` file.
 """
 
 from __future__ import print_function, unicode_literals
@@ -22,7 +22,9 @@ from fnmatch import fnmatch
 from time import time
 from multiprocessing.dummy import Pool
 
-from workflow import Workflow
+from workflow import Workflow3
+
+from repos import Repo
 
 # How many search threads to run at the same time
 CONCURRENT_SEARCHES = 4
@@ -49,7 +51,6 @@ def find_git_repos(dirpath, excludes, depth, name_for_parent=1):
     the repo after relative to `.git` (1=immediate parent, 2=grandparent)
 
     """
-
     start = time()
 
     cmd = ['find', '-L', dirpath,
@@ -86,7 +87,7 @@ def find_git_repos(dirpath, excludes, depth, name_for_parent=1):
                 name = components[-(name_for_parent)]
 
         log.debug('repo `{}` at `{}`'.format(name, filepath))
-        results.append((name, filepath))
+        results.append(Repo(name, filepath))
 
     log.debug('{} repos found in `{}` in {:0.2f} s'.format(len(results),
                                                            dirpath,
@@ -95,7 +96,7 @@ def find_git_repos(dirpath, excludes, depth, name_for_parent=1):
 
 
 def main(wf):
-
+    """Run script."""
     start = time()
 
     search_dirs = wf.settings.get('search_dirs', [])
@@ -143,7 +144,7 @@ def main(wf):
 
 
 if __name__ == '__main__':
-    wf = Workflow()
+    wf = Workflow3()
     log = wf.logger
     decode = wf.decode
     sys.exit(wf.run(main))

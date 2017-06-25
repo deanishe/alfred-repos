@@ -8,42 +8,39 @@
 # Created on 2013-11-04
 #
 
-"""repos.py [options] [<query>] [<appnum>] [<path>]
+"""repos.py [command] [options] [<query>] [<path>]
 
 Find, open and search Git repos on your system.
 
 Usage:
-    repos.py [<query>]
-    repos.py (-e|--edit)
-    repos.py --helpfile
-    repos.py --update
-    repos.py --open <appnum> <path>
+    repos.py search [<query>]
+    repos.py settings
+    repos.py update
+    repos.py open [<appkey>] <path>
 
 Options:
-    --update        Update database of Git repos
-    --open          Open path in specified app
-    -e, --edit      Open settings file
     -h, --help      Show this message
-    --helpfile      Open included help file
 
 """
 
-from __future__ import print_function, unicode_literals
+from __future__ import print_function
 
+from collections import namedtuple
 import sys
 import os
 import subprocess
 import re
 
-from workflow import Workflow, ICON_WARNING, ICON_INFO
+from workflow import Workflow3, ICON_WARNING, ICON_INFO
 from workflow.background import is_running, run_in_background
+from workflow.update import Version
 
 
 # How often to check for new/updated repos
-UPDATE_INTERVAL = 3600 * 3  # 3 hours
+DEFAULT_UPDATE_INTERVAL = 180  # minutes
 
 # GitHub repo for self-updating
-GITHUB_UPDATE_CONF = {'github_slug': 'deanishe/alfred-repos'}
+UPDATE_SETTINGS = {'github_slug': 'deanishe/alfred-repos'}
 
 # GitHub Issues
 HELP_URL = 'https://github.com/deanishe/alfred-repos/issues'
@@ -51,14 +48,17 @@ HELP_URL = 'https://github.com/deanishe/alfred-repos/issues'
 # Icon shown if a newer version is available
 ICON_UPDATE = 'update-available.png'
 
+# Available modifier keys
+MODIFIERS = ('cmd', 'alt', 'ctrl', 'shift', 'fn')
+
 # These apps will be passed the remote repo URL instead
 # of the local directory path
 BROWSERS = [
+    'Browser',  # default browser
     'Google Chrome',
     'Firefox',
     'Safari',
     'WebKit',
-
 ]
 
 DEFAULT_SETTINGS = {
@@ -69,95 +69,304 @@ DEFAULT_SETTINGS = {
         'excludes': ['tmp', 'bad/smell/*']
     }],
     'global_exclude_patterns': [],
-    'app_1': 'Finder',
-    'app_2': 'Terminal',
-    'app_3': None,
-    'app_4': None,
-    'app_5': None,
-    'app_6': None,
+    'app_default': 'Finder',
+    'app_cmd': 'Terminal',
+    'app_alt': None,
+    'app_ctrl': None,
+    'app_shift': None,
+    'app_fn': None,
 }
 
 # Will be populated later
 log = None
 
 
+Repo = namedtuple('Repo', 'name path')
+
+
+class AttrDict(dict):
+    """Access dictionary keys as attributes."""
+
+    def __init__(self, *args, **kwargs):
+        """Create new dictionary."""
+        super(AttrDict, self).__init__(*args, **kwargs)
+        # Assigning self to __dict__ turns keys into attributes
+        self.__dict__ = self
+
+
+def migrate_v1_config():
+    """Replace v1 format in settings with v2 format.
+
+    Change numbered apps to named apps.
+    """
+    log.debug('migrating v1 config to v2 ...')
+    newkeys = {
+        '1': 'default',
+        '2': 'cmd',
+        '3': 'alt',
+        '4': 'ctrl',
+        '5': 'shift',
+        '6': 'fn',
+    }
+    for k, nk in newkeys.items():
+        v = wf.settings.get('app_' + k)
+        wf.settings['app_' + nk] = v
+        try:
+            del wf.settings['app_' + k]
+            log.debug('changed `app_%s` to `app_%s`', k, nk)
+        except KeyError:
+            pass
+
+
 def join_english(items):
-    """Join a list of unicode objects with commas and/or 'and'"""
+    """Join a list of unicode objects with commas and/or 'and'."""
     if isinstance(items, unicode):
         return items
+
     if len(items) == 1:
-        return '{}'.format(items[0])
+        return unicode(items[0])
+
     elif len(items) == 2:
-        return ' and '.join(items)
+        return u' and '.join(items)
+
     last = items.pop()
-    return ', '.join(items) + ' and {}'.format(last)
+    return u', '.join(items) + u' and {}'.format(last)
 
 
-def main(wf):
-    """Run the workflow."""
+def get_apps():
+    """Load applications configured in settings.
+
+    Each value may be a string for a single app or a list for
+    multiple apps.
+
+    Returns:
+        dict: Modkey to application mapping.
+    """
+    apps = {}
+    for mod in ('default', 'cmd', 'alt', 'ctrl', 'shift', 'fn'):
+        app = wf.settings.get('app_{}'.format(mod))
+        if isinstance(app, list):
+            app = app[:]
+        apps[mod] = app
+
+    if not apps.get('default'):  # Things will break if this isn't set
+        apps['default'] = u'Finder'
+
+    return apps
+
+
+def get_repos(opts):
+    """Load repos from cache, triggering an update if necessary.
+
+    Args:
+        opts (AttrDict): CLI options
+
+    Returns:
+        list: Sequence of `Repo` tuples.
+    """
+    # Load data, update if necessary
+    if not wf.cached_data_fresh('repos', max_age=opts.update_interval):
+        run_in_background('update', ['/usr/bin/python', 'update.py'])
+    repos = wf.cached_data('repos', max_age=0)
+
+    # Check if cached data is old version
+    if isinstance(repos[0], basestring):
+        run_in_background('update', ['/usr/bin/python', 'update.py'])
+        return []
+
+    return repos
+
+
+def repo_url(path):
+    """Return repo URL extracted from `.git/config`.
+
+    Args:
+        path (str): Path to git repo.
+
+    Returns:
+        str: URL of remote/origin.
+    """
+    url = subprocess.check_output(['git', 'config', 'remote.origin.url'],
+                                  cwd=path)
+    url = re.sub(r'(^.+@)|(^https://)|(^git://)|(.git$)', '', url)
+    return 'https://' + re.sub(r':', '/', url).strip()
+
+
+def do_open(opts):
+    """Open repo in the specified application(s).
+
+    Args:
+        opts (AttrDict): CLI options.
+
+    Returns:
+        int: Exit status.
+    """
+    all_apps = get_apps()
+    apps = all_apps.get(opts.appkey)
+    if apps is None:
+        print('App {} not set. Use `reposettings`'.format(opts.appkey))
+        return 0
+
+    if not isinstance(apps, list):
+        apps = [apps]
+
+    for app in apps:
+        if app in BROWSERS:
+            url = repo_url(opts.path)
+            log.info('opening %s with %s ...', url, app)
+            if app == 'Browser':
+                subprocess.call(['open', url])
+            else:
+                subprocess.call(['open', '-a', app, url])
+        else:
+            log.info('opening %s with %s ...', opts.path, app)
+            subprocess.call(['open', '-a', app, opts.path])
+
+
+def do_settings(opts):
+    """Open ``settings.json`` in default editor.
+
+    Args:
+        opts (AttrDict): CLI options.
+
+    Returns:
+        int: Exit status.
+    """
+    subprocess.call(['open', wf.settings_path])
+    return 0
+
+
+def do_update(opts):
+    """Update cached list of git repos.
+
+    Args:
+        opts (AttrDict): CLI options.
+
+    Returns:
+        int: Exit status.
+    """
+    run_in_background('update', ['/usr/bin/python', 'update.py'])
+    return 0
+
+
+def do_search(repos, opts):
+    """Filter list of repos and show results in Alfred.
+
+    Args:
+        repos (list): Sequence of ``Repo`` tuples.
+        opts (AttrDict): CLI options.
+
+    Returns:
+        int: Exit status.
+    """
+    # Set modifier subtitles
+    apps = get_apps()
+    subtitles = {}
+
+    for modkey in MODIFIERS:
+        if not apps.get('app_' + modkey):
+            subtitles[modkey] = ('App ' + modkey + ' not set. '
+                                 'Use `reposettings` to set it.')
+        else:
+            subtitles[modkey] = 'Open in {}'.format(join_english(apps[modkey]))
+
+    if opts.query:
+        repos = wf.filter(opts.query, repos, lambda t: t[0], min_score=30)
+        log.info('%d/%d repos match `%s`', len(repos), len(repos), opts.query)
+
+    if not repos:
+        wf.add_item('No matching repos found', icon=ICON_WARNING)
+
+    for r in repos:
+        log.debug(r)
+        short_path = r.path.replace(os.environ['HOME'], '~')
+        subtitle = '{}  //  Open in {}'.format(short_path,
+                                               join_english(apps['default']))
+        it = wf.add_item(
+            r.name,
+            subtitle,
+            arg=r.path,
+            uid=r.path,
+            valid=True,
+            type='file',
+            icon='icon.png'
+        )
+
+        for modkey in MODIFIERS:
+            app = apps.get(modkey)
+            if not app:
+                subtitle = ('App ' + modkey + ' not set. '
+                            'Use `reposettings` to set it.')
+                valid = False
+            else:
+                subtitle = 'Open in {}'.format(join_english(app))
+                valid = True
+
+            mod = it.add_modifier(modkey, subtitle, r.path, valid)
+            mod.setvar('appkey', modkey)
+
+    wf.send_feedback()
+    return 0
+
+
+def parse_args():
+    """Extract options from CLI arguments.
+
+    Returns:
+        AttrDict: CLI options.
+    """
     from docopt import docopt
 
     # Handle arguments
     # ------------------------------------------------------------------
     args = docopt(__doc__, wf.args)
 
-    log.debug('args: {}'.format(args))
+    log.debug('args=%r', args)
 
-    query = args.get('<query>')
-    path = args.get('<path>')
-    appnum = args.get('<appnum>')
-    if appnum:
-        appnum = int(appnum)
+    update_interval = int(os.getenv('UPDATE_EVERY_MINS',
+                                    DEFAULT_UPDATE_INTERVAL)) * 60
 
-    apps = {}
-    for i in range(1, 7):
-        app = wf.settings.get('app_{}'.format(i))
-        if isinstance(app, list):
-            app = app[:]
-        apps[i] = app
+    opts = AttrDict(
+        query=args.get('<query>'),
+        path=args.get('<path>'),
+        appkey=args.get('<appkey>') or 'default',
+        update_interval=update_interval,
+        do_search=args.get('search'),
+        do_update=args.get('update'),
+        do_settings=args.get('settings'),
+        do_open=args.get('open'),
+    )
 
-    if not apps.get(1):  # Things will break if this isn't set
-        apps[1] = 'Finder'
+    log.debug('opts=%r', opts)
+    return opts
+
+
+def main(wf):
+    """Run the workflow."""
+    # Update settings format
+    if wf.last_version_run < Version('2'):
+        migrate_v1_config()
+
+    opts = parse_args()
 
     # Alternate actions
     # ------------------------------------------------------------------
-    if appnum and path:
-        app = apps.get(appnum)
-        if app is None:
-            print('App {} not set. Use `reposettings`'.format(appnum))
-            return 0
-        else:
-            if not isinstance(app, list):
-                app = [app]
-            for a in app:
-                if a in BROWSERS:
-                    url = subprocess.check_output(
-                        ['git', 'config', 'remote.origin.url'],
-                        cwd=path
-                    )
-                    url = re.sub(r'(^.+@)|(^https://)|(^git://)|(.git$)','',url)
-                    url = "https://" + re.sub(r':','/',url).strip()
-                    subprocess.call(['open', '-a', a, url])
+    if opts.do_open:
+        return do_open(opts)
 
-                else:
-                    subprocess.call(['open', '-a', a, path])
-            return 0
+    elif opts.do_settings:
+        return do_settings(opts)
 
-    elif args.get('--edit'):
-        subprocess.call(['open', wf.settings_path])
-        return 0
-
-    elif args.get('--update'):
-        run_in_background('update', ['/usr/bin/python', 'update.py'])
-        return 0
+    elif opts.do_update:
+        return do_update(opts)
 
     # Notify user if update is available
     # ------------------------------------------------------------------
     if wf.update_available:
         v = wf.cached_data('__workflow_update_status', max_age=0)['version']
-        log.info('Newer version ({}) is available'.format(v))
+        log.info('Newer version (%s) is available', v)
         wf.add_item('Version {} is available'.format(v),
-                    'Use `workflow:update` to install',
+                    u'↩ or ⇥ to install',
                     icon=ICON_UPDATE)
 
     # Try to search git repos
@@ -172,85 +381,33 @@ def main(wf):
         wf.send_feedback()
         return 0
 
-    # Load data, update if necessary
-    if not wf.cached_data_fresh('repos', max_age=UPDATE_INTERVAL):
-        run_in_background('update', ['/usr/bin/python', 'update.py'])
-
-    repos = wf.cached_data('repos', max_age=0)
+    repos = get_repos(opts)
 
     # Show appropriate warning/info message if there are no repos to
     # show/search
     # ------------------------------------------------------------------
     if not repos:
         if is_running('update'):
-            wf.add_item('Initialising database of repos…',
+            wf.add_item(u'Updating list of repos…',
                         'Should be done in a few seconds',
                         icon=ICON_INFO)
         else:
-            wf.add_item('No known git repos',
+            wf.add_item('No git repos found',
                         'Check your settings with `reposettings`',
                         icon=ICON_WARNING)
         wf.send_feedback()
         return 0
 
-    # Check if cached data is old version
-    # ------------------------------------------------------------------
-    if isinstance(repos[0], basestring):
-        run_in_background('update', ['/usr/bin/python', 'update.py'])
-        wf.add_item('Updating format of repos database…',
-                    'Should be done in a few seconds',
-                    icon=ICON_INFO)
-        wf.send_feedback()
-        return 0
+    # Reload results if `update` is running
+    if is_running('update'):
+        wf.rerun = 0.5
 
-    # Perform search and send results to Alfred
-    # ------------------------------------------------------------------
-
-    # Set modifier subtitles
-    modifier_subtitles = {}
-    i = 2
-    for mod in ('cmd', 'alt', 'ctrl', 'shift', 'fn'):
-        if not apps.get(i):
-            modifier_subtitles[mod] = (
-                'App {} not set. Use `reposettings` to set it.'.format(i))
-        else:
-            modifier_subtitles[mod] = 'Open in {}'.format(join_english(apps[i]))
-        i += 1
-
-    # Total number of repos
-    repo_count = len(repos)
-
-    if query:
-        repos = wf.filter(query, repos,
-                          lambda t: t[0],
-                          min_score=30)
-        log.debug('{}/{} repos matching `{}`'.format(len(repos),
-                                                     repo_count,
-                                                     query))
-
-    if not repos:
-        wf.add_item('No matching repos found', icon=ICON_WARNING)
-
-    for name, path in repos:
-        log.debug('`{}` @ `{}`'.format(name, path))
-        subtitle = (path.replace(os.environ['HOME'], '~') +
-                    '  //  Open in {}'.format(join_english(apps[1])))
-        wf.add_item(name,
-                    subtitle,
-                    modifier_subtitles=modifier_subtitles,
-                    arg=path,
-                    uid=path,
-                    valid=True,
-                    type='file',
-                    icon='icon.png')
-
-    wf.send_feedback()
-    return 0
+    return do_search(repos, opts)
 
 
 if __name__ == '__main__':
-    wf = Workflow(default_settings=DEFAULT_SETTINGS,
-                  update_settings=GITHUB_UPDATE_CONF,
-                  help_url=HELP_URL)
+    wf = Workflow3(default_settings=DEFAULT_SETTINGS,
+                   update_settings=UPDATE_SETTINGS,
+                   help_url=HELP_URL)
     log = wf.logger
     sys.exit(wf.run(main))

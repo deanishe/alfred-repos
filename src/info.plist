@@ -6,17 +6,6 @@
 	<string>net.deanishe.alfred-git-repos</string>
 	<key>connections</key>
 	<dict>
-		<key>0280D28A-796C-4B53-B165-69CFEE2AC9ED</key>
-		<array>
-			<dict>
-				<key>destinationuid</key>
-				<string>D2D75AF8-15E1-40D8-84D1-AE23BA5263F4</string>
-				<key>modifiers</key>
-				<integer>0</integer>
-				<key>modifiersubtext</key>
-				<string></string>
-			</dict>
-		</array>
 		<key>13C4EEDF-EC8D-4B23-8693-6E050109AFDC</key>
 		<array>
 			<dict>
@@ -26,6 +15,8 @@
 				<integer>0</integer>
 				<key>modifiersubtext</key>
 				<string></string>
+				<key>vitoclose</key>
+				<false/>
 			</dict>
 		</array>
 		<key>227B191C-26EA-4302-B5A1-79CBA4BF107A</key>
@@ -37,6 +28,8 @@
 				<integer>0</integer>
 				<key>modifiersubtext</key>
 				<string></string>
+				<key>vitoclose</key>
+				<false/>
 			</dict>
 		</array>
 		<key>25B07D69-2EF2-420F-8B3B-0E7E7CA7B34F</key>
@@ -48,6 +41,8 @@
 				<integer>0</integer>
 				<key>modifiersubtext</key>
 				<string></string>
+				<key>vitoclose</key>
+				<false/>
 			</dict>
 		</array>
 		<key>25BDF5B8-CC9C-444A-B35A-CD0ED5D35A84</key>
@@ -59,31 +54,24 @@
 				<integer>0</integer>
 				<key>modifiersubtext</key>
 				<string></string>
-			</dict>
-		</array>
-		<key>4E9824B1-01AD-4CC5-A191-A529DD06BFA8</key>
-		<array>
-			<dict>
-				<key>destinationuid</key>
-				<string>D2D75AF8-15E1-40D8-84D1-AE23BA5263F4</string>
-				<key>modifiers</key>
-				<integer>0</integer>
-				<key>modifiersubtext</key>
-				<string></string>
-			</dict>
-		</array>
-		<key>6A87EBD2-2923-46B0-A761-B69F2D0A7A72</key>
-		<array>
-			<dict>
-				<key>destinationuid</key>
-				<string>D2D75AF8-15E1-40D8-84D1-AE23BA5263F4</string>
-				<key>modifiers</key>
-				<integer>0</integer>
-				<key>modifiersubtext</key>
-				<string></string>
+				<key>vitoclose</key>
+				<false/>
 			</dict>
 		</array>
 		<key>71820CCE-FF52-4077-B790-ACA80D174C54</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>CB04399E-A00E-40F1-8753-994DF261B93C</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
+		<key>CB04399E-A00E-40F1-8753-994DF261B93C</key>
 		<array>
 			<dict>
 				<key>destinationuid</key>
@@ -92,68 +80,8 @@
 				<integer>0</integer>
 				<key>modifiersubtext</key>
 				<string></string>
-			</dict>
-			<dict>
-				<key>destinationuid</key>
-				<string>A9F4EAB1-A09B-4E6C-9FA9-888DD986B795</string>
-				<key>modifiers</key>
-				<integer>1048576</integer>
-				<key>modifiersubtext</key>
-				<string></string>
-			</dict>
-			<dict>
-				<key>destinationuid</key>
-				<string>781F446E-4F25-46C1-B2A0-26D8D4CE361E</string>
-				<key>modifiers</key>
-				<integer>524288</integer>
-				<key>modifiersubtext</key>
-				<string></string>
-			</dict>
-			<dict>
-				<key>destinationuid</key>
-				<string>0280D28A-796C-4B53-B165-69CFEE2AC9ED</string>
-				<key>modifiers</key>
-				<integer>262144</integer>
-				<key>modifiersubtext</key>
-				<string></string>
-			</dict>
-			<dict>
-				<key>destinationuid</key>
-				<string>6A87EBD2-2923-46B0-A761-B69F2D0A7A72</string>
-				<key>modifiers</key>
-				<integer>131072</integer>
-				<key>modifiersubtext</key>
-				<string></string>
-			</dict>
-			<dict>
-				<key>destinationuid</key>
-				<string>4E9824B1-01AD-4CC5-A191-A529DD06BFA8</string>
-				<key>modifiers</key>
-				<integer>8388608</integer>
-				<key>modifiersubtext</key>
-				<string></string>
-			</dict>
-		</array>
-		<key>781F446E-4F25-46C1-B2A0-26D8D4CE361E</key>
-		<array>
-			<dict>
-				<key>destinationuid</key>
-				<string>D2D75AF8-15E1-40D8-84D1-AE23BA5263F4</string>
-				<key>modifiers</key>
-				<integer>0</integer>
-				<key>modifiersubtext</key>
-				<string></string>
-			</dict>
-		</array>
-		<key>A9F4EAB1-A09B-4E6C-9FA9-888DD986B795</key>
-		<array>
-			<dict>
-				<key>destinationuid</key>
-				<string>D2D75AF8-15E1-40D8-84D1-AE23BA5263F4</string>
-				<key>modifiers</key>
-				<integer>0</integer>
-				<key>modifiersubtext</key>
-				<string></string>
+				<key>vitoclose</key>
+				<false/>
 			</dict>
 		</array>
 	</dict>
@@ -170,12 +98,125 @@
 		<dict>
 			<key>config</key>
 			<dict>
+				<key>lastpathcomponent</key>
+				<false/>
+				<key>onlyshowifquerypopulated</key>
+				<true/>
+				<key>removeextension</key>
+				<false/>
+				<key>text</key>
+				<string>{query}</string>
+				<key>title</key>
+				<string>Configuration error</string>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.output.notification</string>
+			<key>uid</key>
+			<string>D2D75AF8-15E1-40D8-84D1-AE23BA5263F4</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>concurrently</key>
+				<false/>
+				<key>escaping</key>
+				<integer>102</integer>
+				<key>script</key>
+				<string>echo /usr/bin/python repos.py open $appkey "$1" &gt;&amp;2
+/usr/bin/python repos.py open $appkey "$1"</string>
+				<key>scriptargtype</key>
+				<integer>1</integer>
+				<key>scriptfile</key>
+				<string></string>
+				<key>type</key>
+				<integer>0</integer>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.action.script</string>
+			<key>uid</key>
+			<string>25B07D69-2EF2-420F-8B3B-0E7E7CA7B34F</string>
+			<key>version</key>
+			<integer>2</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>alfredfiltersresults</key>
+				<false/>
+				<key>argumenttrimmode</key>
+				<integer>0</integer>
+				<key>argumenttype</key>
+				<integer>1</integer>
+				<key>escaping</key>
+				<integer>102</integer>
+				<key>keyword</key>
+				<string>repos</string>
+				<key>queuedelaycustom</key>
+				<integer>3</integer>
+				<key>queuedelayimmediatelyinitially</key>
+				<false/>
+				<key>queuedelaymode</key>
+				<integer>0</integer>
+				<key>queuemode</key>
+				<integer>1</integer>
+				<key>runningsubtext</key>
+				<string>Loading list of repos…</string>
+				<key>script</key>
+				<string>/usr/bin/python repos.py search "$1"</string>
+				<key>scriptargtype</key>
+				<integer>1</integer>
+				<key>scriptfile</key>
+				<string></string>
+				<key>subtext</key>
+				<string>View, Filter, Open Your Git Repositories</string>
+				<key>title</key>
+				<string>Git Repos</string>
+				<key>type</key>
+				<integer>0</integer>
+				<key>withspace</key>
+				<true/>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.input.scriptfilter</string>
+			<key>uid</key>
+			<string>71820CCE-FF52-4077-B790-ACA80D174C54</string>
+			<key>version</key>
+			<integer>2</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>argument</key>
+				<string>.
+query='{query}'
+variables={allvars}</string>
+				<key>cleardebuggertext</key>
+				<false/>
+				<key>processoutputs</key>
+				<true/>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.utility.debug</string>
+			<key>uid</key>
+			<string>CB04399E-A00E-40F1-8753-994DF261B93C</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
 				<key>concurrently</key>
 				<false/>
 				<key>escaping</key>
 				<integer>127</integer>
 				<key>script</key>
-				<string>/usr/bin/python repos.py --edit</string>
+				<string>/usr/bin/python repos.py settings</string>
+				<key>scriptargtype</key>
+				<integer>1</integer>
+				<key>scriptfile</key>
+				<string></string>
 				<key>type</key>
 				<integer>0</integer>
 			</dict>
@@ -184,7 +225,7 @@
 			<key>uid</key>
 			<string>E36B8788-0F7C-494A-A3D5-3347CA273F85</string>
 			<key>version</key>
-			<integer>0</integer>
+			<integer>2</integer>
 		</dict>
 		<dict>
 			<key>config</key>
@@ -205,7 +246,7 @@
 			<key>uid</key>
 			<string>25BDF5B8-CC9C-444A-B35A-CD0ED5D35A84</string>
 			<key>version</key>
-			<integer>0</integer>
+			<integer>1</integer>
 		</dict>
 		<dict>
 			<key>config</key>
@@ -214,6 +255,8 @@
 				<integer>2</integer>
 				<key>keyword</key>
 				<string>reposhelp</string>
+				<key>subtext</key>
+				<string></string>
 				<key>text</key>
 				<string>Open Repos Help File</string>
 				<key>withspace</key>
@@ -224,7 +267,7 @@
 			<key>uid</key>
 			<string>13C4EEDF-EC8D-4B23-8693-6E050109AFDC</string>
 			<key>version</key>
-			<integer>0</integer>
+			<integer>1</integer>
 		</dict>
 		<dict>
 			<key>config</key>
@@ -235,6 +278,10 @@
 				<integer>127</integer>
 				<key>script</key>
 				<string>open README.html</string>
+				<key>scriptargtype</key>
+				<integer>1</integer>
+				<key>scriptfile</key>
+				<string></string>
 				<key>type</key>
 				<integer>0</integer>
 			</dict>
@@ -243,7 +290,7 @@
 			<key>uid</key>
 			<string>FC60057D-548A-4394-9426-1764C21DC6F0</string>
 			<key>version</key>
-			<integer>0</integer>
+			<integer>2</integer>
 		</dict>
 		<dict>
 			<key>config</key>
@@ -252,6 +299,8 @@
 				<integer>2</integer>
 				<key>keyword</key>
 				<string>reposupdate</string>
+				<key>subtext</key>
+				<string></string>
 				<key>text</key>
 				<string>Update Git Repo Database</string>
 				<key>withspace</key>
@@ -262,7 +311,7 @@
 			<key>uid</key>
 			<string>227B191C-26EA-4302-B5A1-79CBA4BF107A</string>
 			<key>version</key>
-			<integer>0</integer>
+			<integer>1</integer>
 		</dict>
 		<dict>
 			<key>config</key>
@@ -272,7 +321,11 @@
 				<key>escaping</key>
 				<integer>127</integer>
 				<key>script</key>
-				<string>/usr/bin/python repos.py --update</string>
+				<string>/usr/bin/python repos.py update</string>
+				<key>scriptargtype</key>
+				<integer>1</integer>
+				<key>scriptfile</key>
+				<string></string>
 				<key>type</key>
 				<integer>0</integer>
 			</dict>
@@ -281,183 +334,7 @@
 			<key>uid</key>
 			<string>47FD6543-A4A6-4714-B190-9DF8B5B28444</string>
 			<key>version</key>
-			<integer>0</integer>
-		</dict>
-		<dict>
-			<key>config</key>
-			<dict>
-				<key>lastpathcomponent</key>
-				<false/>
-				<key>onlyshowifquerypopulated</key>
-				<true/>
-				<key>output</key>
-				<integer>0</integer>
-				<key>removeextension</key>
-				<false/>
-				<key>sticky</key>
-				<false/>
-				<key>text</key>
-				<string>{query}</string>
-				<key>title</key>
-				<string>Configuration error</string>
-			</dict>
-			<key>type</key>
-			<string>alfred.workflow.output.notification</string>
-			<key>uid</key>
-			<string>D2D75AF8-15E1-40D8-84D1-AE23BA5263F4</string>
-			<key>version</key>
-			<integer>0</integer>
-		</dict>
-		<dict>
-			<key>config</key>
-			<dict>
-				<key>concurrently</key>
-				<false/>
-				<key>escaping</key>
-				<integer>102</integer>
-				<key>script</key>
-				<string>/usr/bin/python repos.py --open 1 "{query}"</string>
-				<key>type</key>
-				<integer>0</integer>
-			</dict>
-			<key>type</key>
-			<string>alfred.workflow.action.script</string>
-			<key>uid</key>
-			<string>25B07D69-2EF2-420F-8B3B-0E7E7CA7B34F</string>
-			<key>version</key>
-			<integer>0</integer>
-		</dict>
-		<dict>
-			<key>config</key>
-			<dict>
-				<key>argumenttype</key>
-				<integer>1</integer>
-				<key>escaping</key>
-				<integer>102</integer>
-				<key>keyword</key>
-				<string>repos</string>
-				<key>queuedelaycustom</key>
-				<integer>1</integer>
-				<key>queuedelayimmediatelyinitially</key>
-				<false/>
-				<key>queuedelaymode</key>
-				<integer>0</integer>
-				<key>queuemode</key>
-				<integer>1</integer>
-				<key>runningsubtext</key>
-				<string>Loading list of repos…</string>
-				<key>script</key>
-				<string>/usr/bin/python repos.py "{query}"</string>
-				<key>subtext</key>
-				<string>View, Filter, Open Your Git Repositories</string>
-				<key>title</key>
-				<string>Git Repos</string>
-				<key>type</key>
-				<integer>0</integer>
-				<key>withspace</key>
-				<true/>
-			</dict>
-			<key>type</key>
-			<string>alfred.workflow.input.scriptfilter</string>
-			<key>uid</key>
-			<string>71820CCE-FF52-4077-B790-ACA80D174C54</string>
-			<key>version</key>
-			<integer>0</integer>
-		</dict>
-		<dict>
-			<key>config</key>
-			<dict>
-				<key>concurrently</key>
-				<false/>
-				<key>escaping</key>
-				<integer>102</integer>
-				<key>script</key>
-				<string>/usr/bin/python repos.py --open 2 "{query}"</string>
-				<key>type</key>
-				<integer>0</integer>
-			</dict>
-			<key>type</key>
-			<string>alfred.workflow.action.script</string>
-			<key>uid</key>
-			<string>A9F4EAB1-A09B-4E6C-9FA9-888DD986B795</string>
-			<key>version</key>
-			<integer>0</integer>
-		</dict>
-		<dict>
-			<key>config</key>
-			<dict>
-				<key>concurrently</key>
-				<false/>
-				<key>escaping</key>
-				<integer>102</integer>
-				<key>script</key>
-				<string>/usr/bin/python repos.py --open 3 "{query}"</string>
-				<key>type</key>
-				<integer>0</integer>
-			</dict>
-			<key>type</key>
-			<string>alfred.workflow.action.script</string>
-			<key>uid</key>
-			<string>781F446E-4F25-46C1-B2A0-26D8D4CE361E</string>
-			<key>version</key>
-			<integer>0</integer>
-		</dict>
-		<dict>
-			<key>config</key>
-			<dict>
-				<key>concurrently</key>
-				<false/>
-				<key>escaping</key>
-				<integer>102</integer>
-				<key>script</key>
-				<string>/usr/bin/python repos.py --open 4 "{query}"</string>
-				<key>type</key>
-				<integer>0</integer>
-			</dict>
-			<key>type</key>
-			<string>alfred.workflow.action.script</string>
-			<key>uid</key>
-			<string>0280D28A-796C-4B53-B165-69CFEE2AC9ED</string>
-			<key>version</key>
-			<integer>0</integer>
-		</dict>
-		<dict>
-			<key>config</key>
-			<dict>
-				<key>concurrently</key>
-				<false/>
-				<key>escaping</key>
-				<integer>102</integer>
-				<key>script</key>
-				<string>/usr/bin/python repos.py --open 5 "{query}"</string>
-				<key>type</key>
-				<integer>0</integer>
-			</dict>
-			<key>type</key>
-			<string>alfred.workflow.action.script</string>
-			<key>uid</key>
-			<string>6A87EBD2-2923-46B0-A761-B69F2D0A7A72</string>
-			<key>version</key>
-			<integer>0</integer>
-		</dict>
-		<dict>
-			<key>config</key>
-			<dict>
-				<key>concurrently</key>
-				<false/>
-				<key>escaping</key>
-				<integer>102</integer>
-				<key>script</key>
-				<string>/usr/bin/python repos.py --open 6 "{query}"</string>
-				<key>type</key>
-				<integer>0</integer>
-			</dict>
-			<key>type</key>
-			<string>alfred.workflow.action.script</string>
-			<key>uid</key>
-			<string>4E9824B1-01AD-4CC5-A191-A529DD06BFA8</string>
-			<key>version</key>
-			<integer>0</integer>
+			<integer>2</integer>
 		</dict>
 	</array>
 	<key>readme</key>
@@ -467,92 +344,118 @@ You must configure your settings with `reposettings` before use.
 
 Use `reposhelp` for detailed instructions.
 
+
 Usage
-=====
+-----
 
 - `repos [&lt;query&gt;]` — Show a list of your Git repos filtered by `&lt;query&gt;`
-	+ `↩` — Open selected repo in `app_1`
-	+ `⌘+↩` — Open selected repo in `app_2`
-	+ `⌥+↩` — Open selected repo in `app_3`
-	+ `^+↩` — Open selected repo in `app_4`
-	+ `⇧+↩` — Open selected repo in `app_5`
-	+ `fn+↩` — Open selected repo in `app_6`
+	+ `↩` — Open selected repo in `app_default`
+	+ `⌘+↩` — Open selected repo in `app_cmd`
+	+ `⌥+↩` — Open selected repo in `app_alt`
+	+ `^+↩` — Open selected repo in `app_ctrl`
+	+ `⇧+↩` — Open selected repo in `app_shift`
+	+ `fn+↩` — Open selected repo in `app_fn`
 - `reposettings` — Open `settings.json` in default JSON editor
 - `reposupdate` — Force workflow to update its cached list of repositories. (By default, the list will only be updated every 3 hours.)
-- `reposhelp` — Open this file in your browser</string>
+- `reposhelp` — Open this file in your browser
+
+
+Configuration
+-------------
+
+Use the `reposhelp` command to see the help file.</string>
 	<key>uidata</key>
 	<dict>
-		<key>0280D28A-796C-4B53-B165-69CFEE2AC9ED</key>
-		<dict>
-			<key>ypos</key>
-			<real>730</real>
-		</dict>
 		<key>13C4EEDF-EC8D-4B23-8693-6E050109AFDC</key>
 		<dict>
+			<key>note</key>
+			<string>Open help file in your browser</string>
+			<key>xpos</key>
+			<integer>40</integer>
 			<key>ypos</key>
-			<real>130</real>
+			<integer>370</integer>
 		</dict>
 		<key>227B191C-26EA-4302-B5A1-79CBA4BF107A</key>
 		<dict>
+			<key>note</key>
+			<string>Force update of repo list</string>
+			<key>xpos</key>
+			<integer>40</integer>
 			<key>ypos</key>
-			<real>250</real>
+			<integer>540</integer>
 		</dict>
 		<key>25B07D69-2EF2-420F-8B3B-0E7E7CA7B34F</key>
 		<dict>
+			<key>note</key>
+			<string>Open repo in specified app</string>
+			<key>xpos</key>
+			<integer>300</integer>
 			<key>ypos</key>
-			<real>370</real>
+			<integer>30</integer>
 		</dict>
 		<key>25BDF5B8-CC9C-444A-B35A-CD0ED5D35A84</key>
 		<dict>
+			<key>note</key>
+			<string>Open settings in your default editor</string>
+			<key>xpos</key>
+			<integer>40</integer>
 			<key>ypos</key>
-			<real>10</real>
+			<integer>200</integer>
 		</dict>
 		<key>47FD6543-A4A6-4714-B190-9DF8B5B28444</key>
 		<dict>
+			<key>xpos</key>
+			<integer>300</integer>
 			<key>ypos</key>
-			<real>250</real>
-		</dict>
-		<key>4E9824B1-01AD-4CC5-A191-A529DD06BFA8</key>
-		<dict>
-			<key>ypos</key>
-			<real>970</real>
-		</dict>
-		<key>6A87EBD2-2923-46B0-A761-B69F2D0A7A72</key>
-		<dict>
-			<key>ypos</key>
-			<real>850</real>
+			<integer>540</integer>
 		</dict>
 		<key>71820CCE-FF52-4077-B790-ACA80D174C54</key>
 		<dict>
+			<key>note</key>
+			<string>View/filter git repos</string>
+			<key>xpos</key>
+			<integer>40</integer>
 			<key>ypos</key>
-			<real>370</real>
+			<integer>30</integer>
 		</dict>
-		<key>781F446E-4F25-46C1-B2A0-26D8D4CE361E</key>
+		<key>CB04399E-A00E-40F1-8753-994DF261B93C</key>
 		<dict>
+			<key>xpos</key>
+			<integer>210</integer>
 			<key>ypos</key>
-			<real>610</real>
-		</dict>
-		<key>A9F4EAB1-A09B-4E6C-9FA9-888DD986B795</key>
-		<dict>
-			<key>ypos</key>
-			<real>490</real>
+			<integer>60</integer>
 		</dict>
 		<key>D2D75AF8-15E1-40D8-84D1-AE23BA5263F4</key>
 		<dict>
+			<key>note</key>
+			<string>Show error message</string>
+			<key>xpos</key>
+			<integer>480</integer>
 			<key>ypos</key>
-			<real>370</real>
+			<integer>30</integer>
 		</dict>
 		<key>E36B8788-0F7C-494A-A3D5-3347CA273F85</key>
 		<dict>
+			<key>xpos</key>
+			<integer>300</integer>
 			<key>ypos</key>
-			<real>10</real>
+			<integer>200</integer>
 		</dict>
 		<key>FC60057D-548A-4394-9426-1764C21DC6F0</key>
 		<dict>
+			<key>xpos</key>
+			<integer>300</integer>
 			<key>ypos</key>
-			<real>130</real>
+			<integer>370</integer>
 		</dict>
 	</dict>
+	<key>variables</key>
+	<dict>
+		<key>UPDATE_EVERY_MINS</key>
+		<string>180</string>
+	</dict>
+	<key>version</key>
+	<string>2.0</string>
 	<key>webaddress</key>
 	<string></string>
 </dict>
