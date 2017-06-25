@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # encoding: utf-8
 #
-# Copyright © 2014 deanishe@deanishe.net
+# Copyright (c) 2014 deanishe@deanishe.net
 #
 # MIT Licence. See http://opensource.org/licenses/MIT
 #
@@ -78,20 +78,21 @@ def find_git_repos(dirpath, excludes, depth, name_for_parent=1):
         else:
             components = filepath.rstrip('/').split('/')
             if name_for_parent >= len(components):
-                log.error(
-                    ('{} : `name_for_parent` is {}, '
-                     'only {} levels in file tree'
-                     ).format(filepath, name_for_parent, len(components)))
+                log.warning(u'%s : `name_for_parent` is %d, but '
+                            u'only %d levels in file tree',
+                            filepath, name_for_parent, len(components))
                 name = os.path.basename(filepath)
             else:
                 name = components[-(name_for_parent)]
 
-        log.debug('repo `{}` at `{}`'.format(name, filepath))
         results.append(Repo(name, filepath))
 
-    log.debug('{} repos found in `{}` in {:0.2f} s'.format(len(results),
-                                                           dirpath,
-                                                           time() - start))
+    log.debug(u'%d repo(s) found in `%s` in %0.2fs', len(results), dirpath,
+              time() - start)
+
+    for r in results:
+        log.debug('    %r', r)
+
     return results
 
 
@@ -119,7 +120,7 @@ def main(wf):
         name_for_parent = data.get('name_for_parent', 1)
 
         if not os.path.exists(dirpath):
-            log.error('Directory does not exist: {}'.format(dirpath))
+            log.error(u'directory does not exist: %s', dirpath)
             continue
 
         r = pool.apply_async(find_git_repos,
@@ -136,8 +137,8 @@ def main(wf):
 
     wf.cache_data('repos', repos)
 
-    log.info('{} repos found in {:0.2f} s'.format(len(repos), time() - start))
-    log.info('Update finished')
+    log.info('%d repo(s) found in %0.2fs', len(repos), time() - start)
+    log.info('update finished')
     [h.flush() for h in log.handlers]
 
     return 0

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # encoding: utf-8
 #
-# Copyright © 2013 deanishe@deanishe.net.
+# Copyright (c) 2013 deanishe@deanishe.net.
 #
 # MIT Licence. See http://opensource.org/licenses/MIT
 #
@@ -16,7 +16,7 @@ Usage:
     repos.py search [<query>]
     repos.py settings
     repos.py update
-    repos.py open [<appkey>] <path>
+    repos.py open <appkey> <path>
 
 Options:
     -h, --help      Show this message
@@ -26,10 +26,11 @@ Options:
 from __future__ import print_function
 
 from collections import namedtuple
-import sys
 import os
-import subprocess
 import re
+import subprocess
+import sys
+import time
 
 from workflow import Workflow3, ICON_WARNING, ICON_INFO
 from workflow.background import is_running, run_in_background
@@ -118,6 +119,19 @@ def migrate_v1_config():
             pass
 
 
+def settings_updated():
+    """Test whether settings file is newer than repos cache.
+
+    Returns:
+        bool: ``True`` if ``settings.json`` is newer than the repos cache.
+
+    """
+    cache_age = wf.cached_data_age('repos')
+    settings_age = time.time() - os.stat(wf.settings_path).st_mtime
+    log.debug('cache_age=%0.2f, settings_age=%0.2f', cache_age, settings_age)
+    return settings_age < cache_age
+
+
 def join_english(items):
     """Join a list of unicode objects with commas and/or 'and'."""
     if isinstance(items, unicode):
@@ -166,12 +180,16 @@ def get_repos(opts):
     """
     # Load data, update if necessary
     if not wf.cached_data_fresh('repos', max_age=opts.update_interval):
-        run_in_background('update', ['/usr/bin/python', 'update.py'])
+        do_update()
     repos = wf.cached_data('repos', max_age=0)
+
+    if not repos:
+        do_update()
+        return []
 
     # Check if cached data is old version
     if isinstance(repos[0], basestring):
-        run_in_background('update', ['/usr/bin/python', 'update.py'])
+        do_update()
         return []
 
     return repos
@@ -223,7 +241,7 @@ def do_open(opts):
             subprocess.call(['open', '-a', app, opts.path])
 
 
-def do_settings(opts):
+def do_settings():
     """Open ``settings.json`` in default editor.
 
     Args:
@@ -236,7 +254,7 @@ def do_settings(opts):
     return 0
 
 
-def do_update(opts):
+def do_update():
     """Update cached list of git repos.
 
     Args:
@@ -272,7 +290,7 @@ def do_search(repos, opts):
 
     if opts.query:
         repos = wf.filter(opts.query, repos, lambda t: t[0], min_score=30)
-        log.info('%d/%d repos match `%s`', len(repos), len(repos), opts.query)
+        log.info(u'%d/%d repos match `%s`', len(repos), len(repos), opts.query)
 
     if not repos:
         wf.add_item('No matching repos found', icon=ICON_WARNING)
@@ -280,8 +298,8 @@ def do_search(repos, opts):
     for r in repos:
         log.debug(r)
         short_path = r.path.replace(os.environ['HOME'], '~')
-        subtitle = '{}  //  Open in {}'.format(short_path,
-                                               join_english(apps['default']))
+        subtitle = u'{}  //  Open in {}'.format(short_path,
+                                                join_english(apps['default']))
         it = wf.add_item(
             r.name,
             subtitle,
@@ -291,6 +309,7 @@ def do_search(repos, opts):
             type='file',
             icon='icon.png'
         )
+        it.setvar('appkey', 'default')
 
         for modkey in MODIFIERS:
             app = apps.get(modkey)
@@ -299,7 +318,7 @@ def do_search(repos, opts):
                             'Use `reposettings` to set it.')
                 valid = False
             else:
-                subtitle = 'Open in {}'.format(join_english(app))
+                subtitle = u'Open in {}'.format(join_english(app))
                 valid = True
 
             mod = it.add_modifier(modkey, subtitle, r.path, valid)
@@ -317,8 +336,6 @@ def parse_args():
     """
     from docopt import docopt
 
-    # Handle arguments
-    # ------------------------------------------------------------------
     args = docopt(__doc__, wf.args)
 
     log.debug('args=%r', args)
@@ -327,7 +344,7 @@ def parse_args():
                                     DEFAULT_UPDATE_INTERVAL)) * 60
 
     opts = AttrDict(
-        query=args.get('<query>'),
+        query=(args.get('<query>') or u'').strip(),
         path=args.get('<path>'),
         appkey=args.get('<appkey>') or 'default',
         update_interval=update_interval,
@@ -355,17 +372,17 @@ def main(wf):
         return do_open(opts)
 
     elif opts.do_settings:
-        return do_settings(opts)
+        return do_settings()
 
     elif opts.do_update:
-        return do_update(opts)
+        return do_update()
 
     # Notify user if update is available
     # ------------------------------------------------------------------
     if wf.update_available:
         v = wf.cached_data('__workflow_update_status', max_age=0)['version']
-        log.info('Newer version (%s) is available', v)
-        wf.add_item('Version {} is available'.format(v),
+        log.info('newer version (%s) is available', v)
+        wf.add_item(u'Version {} is available'.format(v),
                     u'↩ or ⇥ to install',
                     icon=ICON_UPDATE)
 
@@ -381,6 +398,11 @@ def main(wf):
         wf.send_feedback()
         return 0
 
+    # Reload repos if settings file has been updated
+    if settings_updated():
+        log.info('settings were updated. Reloading repos...')
+        do_update()
+
     repos = get_repos(opts)
 
     # Show appropriate warning/info message if there are no repos to
@@ -391,6 +413,7 @@ def main(wf):
             wf.add_item(u'Updating list of repos…',
                         'Should be done in a few seconds',
                         icon=ICON_INFO)
+            wf.rerun = 0.5
         else:
             wf.add_item('No git repos found',
                         'Check your settings with `reposettings`',

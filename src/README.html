@@ -689,8 +689,6 @@ html,body,#wrapper{font-size:10pt!important}
 
 <p>Before you can use this workflow, you have to configure one or more folders in which the workflow should search for Git repos. The workflow uses <code>find</code> to search for <code>.git</code> directories, so you shouldn&rsquo;t add <em>huge</em> directory trees to it, and use the <code>depth</code> option to restrict the search depth. Typically, a <code>depth</code> of <code>2</code> will be what you want (i.e. search within subdirectories of specified directory, but no lower). Add directories to search to the <code>search_dir</code> array in <code>settings.json</code> (see below).</p>
 
-<p><strong>Note:</strong> After (re-)configuration, run <code>reposupdate</code> to (re-)initialise the list of repos.</p>
-
 <p>The default <code>settings.json</code> file looks like this:</p>
 
 <pre><code>{
