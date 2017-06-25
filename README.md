@@ -41,7 +41,7 @@ Before you can use this workflow, you have to configure one or more folders in w
 
 The default `settings.json` file looks like this:
 
-```json
+```javascript
 {
   "app_default": "Finder",               // ↩ to open in this/these app(s)
   "app_cmd": "Terminal",                 // ⌘+↩ to open in this/these app(s)
@@ -66,7 +66,7 @@ The default `settings.json` file looks like this:
 
 This is my `settings.json`:
 
-```json
+```javascript
 {
   "app_alt": "iTerm",
   "app_cmd": "Finder",
