@@ -384,6 +384,7 @@ def main(wf):
         log.info('newer version (%s) is available', v)
         wf.add_item(u'Version {} is available'.format(v),
                     u'↩ or ⇥ to install',
+                    autocomplete='workflow:update',
                     icon=ICON_UPDATE)
 
     # Try to search git repos
