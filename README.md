@@ -1,4 +1,6 @@
 
+<img src="./src/icon.png" width="128" height="128">
+
 Alfred Git Repos Workflow
 =========================
 
