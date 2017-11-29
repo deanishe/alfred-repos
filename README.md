@@ -1,9 +1,9 @@
-<div align="center">
+<h1 align="center">
   <img src="./src/icon.png" width="128" height="128">
-</div>
+</h1>
 
-Alfred Git Repos Workflow
-=========================
+Git Repos Workflow for Alfred
+=============================
 
 Browse, search and open Git repositories from within Alfred.
 
