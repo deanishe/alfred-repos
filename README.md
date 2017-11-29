@@ -1,5 +1,6 @@
-
-<img src="./src/icon.png" width="128" height="128">
+<div align="center">
+  <img src="./src/icon.png" width="128" height="128">
+</div>
 
 Alfred Git Repos Workflow
 =========================
