@@ -40,7 +40,7 @@ decode = None
 
 
 def find_git_repos(dirpath, excludes, depth, name_for_parent=1):
-    """Return list of directories containing a `.git` file or directory
+    """Return list of directories containing a `.git` file or directory.
 
     Results matching globbing patterns in `excludes` will be ignored.
 

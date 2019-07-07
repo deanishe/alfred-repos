@@ -100,6 +100,10 @@
 			<dict>
 				<key>alfredfiltersresults</key>
 				<false/>
+				<key>alfredfiltersresultsmatchmode</key>
+				<integer>0</integer>
+				<key>argumenttreatemptyqueryasnil</key>
+				<false/>
 				<key>argumenttrimmode</key>
 				<integer>0</integer>
 				<key>argumenttype</key>
@@ -138,7 +142,7 @@
 			<key>uid</key>
 			<string>71820CCE-FF52-4077-B790-ACA80D174C54</string>
 			<key>version</key>
-			<integer>2</integer>
+			<integer>3</integer>
 		</dict>
 		<dict>
 			<key>config</key>
@@ -454,7 +458,7 @@ Use the `reposhelp` command to see the help file.</string>
 		<string>180</string>
 	</dict>
 	<key>version</key>
-	<string>2.1.2</string>
+	<string>3.0.0</string>
 	<key>webaddress</key>
 	<string></string>
 </dict>

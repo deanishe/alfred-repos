@@ -50,7 +50,7 @@ HELP_URL = 'https://github.com/deanishe/alfred-repos/issues'
 ICON_UPDATE = 'update-available.png'
 
 # Available modifier keys
-MODIFIERS = ('cmd', 'alt', 'ctrl', 'shift', 'fn')
+# MODIFIERS = ('cmd', 'alt', 'ctrl', 'shift', 'fn')
 
 # These apps will be passed the remote repo URL instead
 # of the local directory path
@@ -110,8 +110,7 @@ def migrate_v1_config():
         '6': 'fn',
     }
     for k, nk in newkeys.items():
-        v = wf.settings.get('app_' + k)
-        wf.settings['app_' + nk] = v
+        wf.settings['app_' + nk] = wf.settings.get('app_' + k)
         try:
             del wf.settings['app_' + k]
             log.debug('changed `app_%s` to `app_%s`', k, nk)
@@ -143,8 +142,7 @@ def join_english(items):
     elif len(items) == 2:
         return u' and '.join(items)
 
-    last = items.pop()
-    return u', '.join(items) + u' and {}'.format(last)
+    return u', '.join(items[:-1]) + u' and {}'.format(items[-1])
 
 
 def get_apps():
@@ -155,13 +153,17 @@ def get_apps():
 
     Returns:
         dict: Modkey to application mapping.
+
     """
     apps = {}
-    for mod in ('default', 'cmd', 'alt', 'ctrl', 'shift', 'fn'):
-        app = wf.settings.get('app_{}'.format(mod))
+    for key, app in wf.settings.items():
+        if not key.startswith('app_'):
+            continue
+
+        key = key[4:]
         if isinstance(app, list):
             app = app[:]
-        apps[mod] = app
+        apps[key] = app
 
     if not apps.get('default'):  # Things will break if this isn't set
         apps['default'] = u'Finder'
@@ -177,6 +179,7 @@ def get_repos(opts):
 
     Returns:
         list: Sequence of `Repo` tuples.
+
     """
     # Load data, update if necessary
     if not wf.cached_data_fresh('repos', max_age=opts.update_interval):
@@ -203,6 +206,7 @@ def repo_url(path):
 
     Returns:
         str: URL of remote/origin.
+
     """
     url = subprocess.check_output(['git', 'config', 'remote.origin.url'],
                                   cwd=path)
@@ -218,6 +222,7 @@ def do_open(opts):
 
     Returns:
         int: Exit status.
+
     """
     all_apps = get_apps()
     apps = all_apps.get(opts.appkey)
@@ -249,6 +254,7 @@ def do_settings():
 
     Returns:
         int: Exit status.
+
     """
     subprocess.call(['open', wf.settings_path])
     return 0
@@ -262,6 +268,7 @@ def do_update():
 
     Returns:
         int: Exit status.
+
     """
     run_in_background('update', ['/usr/bin/python', 'update.py'])
     return 0
@@ -276,17 +283,14 @@ def do_search(repos, opts):
 
     Returns:
         int: Exit status.
+
     """
     # Set modifier subtitles
     apps = get_apps()
     subtitles = {}
 
-    for modkey in MODIFIERS:
-        if not apps.get('app_' + modkey):
-            subtitles[modkey] = ('App ' + modkey + ' not set. '
-                                 'Use `reposettings` to set it.')
-        else:
-            subtitles[modkey] = 'Open in {}'.format(join_english(apps[modkey]))
+    for key, app in apps.items():
+        subtitles[key] = 'Open in {}'.format(join_english(app))
 
     if opts.query:
         repos = wf.filter(opts.query, repos, lambda t: t[0], min_score=30)
@@ -311,18 +315,18 @@ def do_search(repos, opts):
         )
         it.setvar('appkey', 'default')
 
-        for modkey in MODIFIERS:
-            app = apps.get(modkey)
+        for key, app in apps.items():
             if not app:
-                subtitle = ('App ' + modkey + ' not set. '
+                subtitle = ('App for ' + key + ' not set. '
                             'Use `reposettings` to set it.')
                 valid = False
             else:
                 subtitle = u'Open in {}'.format(join_english(app))
                 valid = True
 
-            mod = it.add_modifier(modkey, subtitle, r.path, valid)
-            mod.setvar('appkey', modkey)
+            mod = it.add_modifier(key.replace('_', '+'), subtitle,
+                                  r.path, valid)
+            mod.setvar('appkey', key)
 
     wf.send_feedback()
     return 0
@@ -333,6 +337,7 @@ def parse_args():
 
     Returns:
         AttrDict: CLI options.
+
     """
     from docopt import docopt
 
@@ -380,11 +385,10 @@ def main(wf):
     # Notify user if update is available
     # ------------------------------------------------------------------
     if wf.update_available:
-        v = wf.cached_data('__workflow_update_status', max_age=0)['version']
-        log.info('newer version (%s) is available', v)
-        wf.add_item(u'Version {} is available'.format(v),
+        wf.add_item(u'Workflow Update is Available',
                     u'↩ or ⇥ to install',
                     autocomplete='workflow:update',
+                    valid=False,
                     icon=ICON_UPDATE)
 
     # Try to search git repos

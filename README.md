@@ -1,5 +1,5 @@
 <h1 align="center">
-  <img src="./src/icon.png" width="128" height="128">
+  <img src="./icon.png" width="128" height="128">
 </h1>
 
 Git Repos Workflow for Alfred
@@ -15,7 +15,9 @@ Download
 
 Get the workflow from [GitHub releases][gh-releases].
 
-Version 2 and later are only compatible with Alfred 3. If you're still using Alfred 2, please download version 1 instead.
+**Versions 2.2+ are not compatible with Alfred 3 and earlier.**
+
+For Alfred 3, download [version 2.1.2][v2.1.2], and for Alfred 2, please download [version 1.7][v1.7].
 
 
 Usage
@@ -30,6 +32,10 @@ This workflow requires some configuration before use. See [Configuration](#confi
 	+ `^+↩` — Open selected repo in `app_ctrl` (requires [configuration](#configuration))
 	+ `⇧+↩` — Open selected repo in `app_shift` (requires [configuration](#configuration))
 	+ `fn+↩` — Open selected repo in `app_fn` (requires [configuration](#configuration))
+	+ `⌘⌥+↩` — Open selected repo in `app_cmd_alt` (requires [configuration](#configuration))
+  + `⌘⌥⇧+↩` — Open selected repo in `app_cmd_alt_shift` (requires [configuration](#configuration))
+  + etc.
+  + etc.
 - `reposettings` — Open `settings.json` in default JSON editor
 - `reposupdate` — Force workflow to update its cached list of repositories. (By default, the list will only be updated—in the background—every 3 hours.)
 - `reposhelp` — Open this file in your browser
@@ -71,22 +77,29 @@ This is my `settings.json`:
 {
   "app_alt": "iTerm",
   "app_cmd": "Finder",
-  "app_ctrl": "SourceTree",
-  "app_default": "Sublime Text",
-  "app_fn": [
-    "Sublime Text",
-    "Finder",
-    "SourceTree",
+  "app_cmd_alt": [
+    "VSCodium", 
+    "Finder", 
+    "SourceTree", 
     "iTerm"
   ],
-  "app_shift": "Browser",
-  "global_exclude_patterns": [],
+  "app_ctrl": "SourceTree", 
+  "app_default": "VSCodium", 
+  "app_shift": "Browser", 
+  "global_exclude_patterns": [], 
   "search_dirs": [
     {
+      "depth": 3, 
       "path": "~/Code"
-    },
+    }, 
     {
       "path": "~/Sites"
+    },
+    {
+      "path": "~/src/git.deanishe.net/deanishe"
+    }, 
+    {
+      "path": "~/src/github.com/deanishe"
     }
   ]
 }
@@ -136,6 +149,18 @@ The meta app `Browser` will open the repo's `remote/origin` URL in your default 
 …
 ```
 
+In versions 3+ (i.e. in Alfred 4), you can also arbitrarily combine modifiers to give yourself many more options:
+
+```
+"app_cmd_alt": "Finder",
+"app_shift_alt_cmd": "VSCodium",
+"app_cmd_fn_alt": "Oni",
+etc.
+etc.
+```
+
+Modifiers may be specified in any order. The only requirements are that the key must start with `app_` and the modifiers must be separated by `_`.
+
 You can also use `→` on a result to access Alfred's default File Actions menu.
 
 
@@ -158,3 +183,5 @@ The icon is by [Jason Long][jlong], from [git-scm.com][git], released under the 
 [jlong]: http://twitter.com/jasonlong
 [mit]: http://opensource.org/licenses/MIT
 [packal]: http://www.packal.org/workflow/git-repos
+[v2.1.2]: https://github.com/deanishe/alfred-repos/releases/tag/v2.1.2
+[v1.7]: https://github.com/deanishe/alfred-repos/releases/tag/v1.7
