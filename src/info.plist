@@ -458,7 +458,7 @@ Use the `reposhelp` command to see the help file.</string>
 		<string>180</string>
 	</dict>
 	<key>version</key>
-	<string>3.0.0</string>
+	<string>3.0.1</string>
 	<key>webaddress</key>
 	<string></string>
 </dict>

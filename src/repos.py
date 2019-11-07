@@ -62,9 +62,10 @@ BROWSERS = [
     'WebKit',
 ]
 
+DEFAULT_SEARCH_PATH = '~/delete/this/example'
 DEFAULT_SETTINGS = {
     'search_dirs': [{
-        'path': '~/delete/this/example',
+        'path': DEFAULT_SEARCH_PATH,
         'depth': 2,
         'name_for_parent': 1,
         'excludes': ['tmp', 'bad/smell/*']
@@ -116,6 +117,16 @@ def migrate_v1_config():
             log.debug('changed `app_%s` to `app_%s`', k, nk)
         except KeyError:
             pass
+
+
+def is_defaults(d):
+    """Return ``True`` if settings are do-nothing defaults.
+
+    Args:
+        d (dict): Workflow settings
+    """
+    dirs = d.get('search_dirs') or []
+    return len(dirs) == 1 and dirs[0]['path'] == DEFAULT_SEARCH_PATH
 
 
 def settings_updated():
@@ -366,7 +377,7 @@ def parse_args():
 def main(wf):
     """Run the workflow."""
     # Update settings format
-    if wf.last_version_run < Version('2'):
+    if wf.last_version_run and wf.last_version_run < Version('2'):
         migrate_v1_config()
 
     opts = parse_args()
@@ -396,7 +407,7 @@ def main(wf):
     search_dirs = wf.settings.get('search_dirs', [])
 
     # Can't do anything with no directories to search
-    if not search_dirs or wf.settings == DEFAULT_SETTINGS:
+    if not search_dirs or is_defaults(wf.settings):
         wf.add_item("You haven't configured any directories to search",
                     'Use `reposettings` to edit your configuration',
                     icon=ICON_WARNING)
