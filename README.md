@@ -1,5 +1,5 @@
 <h1 align="center">
-  <img src="./icon.png" width="128" height="128">
+  <img src="./src/icon.png" width="128" height="128">
 </h1>
 
 Git Repos Workflow for Alfred
