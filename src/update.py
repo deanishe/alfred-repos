@@ -39,7 +39,7 @@ log = None
 decode = None
 
 
-def find_git_repos(dirpath, excludes, depth, name_for_parent=1):
+def find_git_repos(dirpath, excludes, depth, user_id, group_ids, name_for_parent=1):
     """Return list of directories containing a `.git` file or directory.
 
     Results matching globbing patterns in `excludes` will be ignored.
@@ -53,9 +53,32 @@ def find_git_repos(dirpath, excludes, depth, name_for_parent=1):
     """
     start = time()
 
+    # assemble excludes for find
+    excludes_for_find = []
+    # add excludes from config
+    if excludes:
+        excludes_for_find += ['('] + \
+            ' -o '.join(['-name ' + exclude for exclude in excludes]).split(' ') + \
+            [')', '-prune', '-o']
+    # tell it to silently ignore folders it can't open
+    excludes_for_find.append('(')
+    # ignore user-owned that we can't open
+    excludes_for_find += ['-uid', str(user_id), '(', '-perm', '-u=rx', '-o', '-prune', ')']
+    excludes_for_find.append('-o')
+    # ignore group-owned that we can't open
+    excludes_for_find += ['('] + \
+        ' -o '.join(['-gid ' + str(gid) for gid in group_ids]).split(' ') + \
+        [')', '(', '-perm', '-g=rx', '-o', '-prune', ')']
+    excludes_for_find.append('-o')
+    # ignore other-owned that we can't open
+    excludes_for_find += ['(', '-perm', '-o=rx', '-o', '-prune', ')']
+    excludes_for_find.append(')')
+
     cmd = ['find', '-L', dirpath,
-           '-name', '.git',
-           '-maxdepth', str(depth)]
+           '-maxdepth', str(depth)] + \
+           excludes_for_find + \
+           ['-name', '.git', 
+           '-print']
 
     output = subprocess.check_output(cmd)
     output = [os.path.dirname(s.strip()) for s in decode(output).split('\n')
@@ -107,6 +130,8 @@ def main(wf):
                   'Nothing to update. Exiting.')
         return 0
 
+    user_id = os.getuid()
+    group_ids = os.getgroups()
     global_excludes = wf.settings.get('global_exclude_patterns', [])
 
     repos = []
@@ -124,7 +149,7 @@ def main(wf):
             continue
 
         r = pool.apply_async(find_git_repos,
-                             (dirpath, excludes, depth, name_for_parent))
+                             (dirpath, excludes, depth, user_id, group_ids, name_for_parent))
         result_objs.append(r)
 
     # Close the pool and wait for it to finish
