@@ -2,7 +2,6 @@
 # encoding: utf-8
 #
 # Copyright (c) 2014 deanishe@deanishe.net
-#
 # MIT Licence. See http://opensource.org/licenses/MIT
 #
 # Created on 2014-07-04
@@ -23,6 +22,7 @@ from time import time
 from multiprocessing.dummy import Pool
 
 from workflow import Workflow3
+from workflow.util import utf8ify
 
 from repos import Repo
 
@@ -39,7 +39,7 @@ log = None
 decode = None
 
 
-def find_git_repos(dirpath, excludes, depth, user_id, group_ids, name_for_parent=1):
+def find_git_repos(dirpath, excludes, depth, uid, gids, name_for_parent=1):
     """Return list of directories containing a `.git` file or directory.
 
     Results matching globbing patterns in `excludes` will be ignored.
@@ -51,36 +51,48 @@ def find_git_repos(dirpath, excludes, depth, user_id, group_ids, name_for_parent
     the repo after relative to `.git` (1=immediate parent, 2=grandparent)
 
     """
+
+    def _group(args, primary, operator=None):
+        """Pair each arg with primary, then join pairs with operator."""
+        out = ['(']
+        for i, arg in enumerate(args):
+            if operator and i > 0 and i < len(args) - 1:
+                out.append(operator)
+
+            out += [primary, arg]
+
+        return out + [')']
+
     start = time()
 
-    # assemble excludes for find
-    excludes_for_find = []
-    # add excludes from config
+    cmd = ['find', '-L', dirpath, '-maxdepth', str(depth)]
+    # excludes converted to `find` arguments
     if excludes:
-        excludes_for_find += ['('] + \
-            ' -o '.join(['-name ' + exclude for exclude in excludes]).split(' ') + \
-            [')', '-prune', '-o']
-    # tell it to silently ignore folders it can't open
-    excludes_for_find.append('(')
+        cmd += _group(excludes, '-name', '-o') + ['-prune', '-o']
+
+    # ignore unreadable directories
+    # https://unix.stackexchange.com/a/257058
+    cmd.append('(')
     # ignore user-owned that we can't open
-    excludes_for_find += ['-uid', str(user_id), '(', '-perm', '-u=rx', '-o', '-prune', ')']
-    excludes_for_find.append('-o')
+    cmd += ['-uid', str(uid), '(', '-perm', '-u=rx', '-o', '-prune', ')']
+
     # ignore group-owned that we can't open
-    excludes_for_find += ['('] + \
-        ' -o '.join(['-gid ' + str(gid) for gid in group_ids]).split(' ') + \
-        [')', '(', '-perm', '-g=rx', '-o', '-prune', ')']
-    excludes_for_find.append('-o')
+    cmd += ['-o'] + _group([str(n) for n in gids], '-gid')
+    cmd += ['(', '-perm', '-g=rx', '-o', '-prune', ')']
+
     # ignore other-owned that we can't open
-    excludes_for_find += ['(', '-perm', '-o=rx', '-o', '-prune', ')']
-    excludes_for_find.append(')')
+    cmd += ['-o', '(', '-perm', '-o=rx', '-o', '-prune', ')']
+    # close "unreadable" group
+    cmd.append(')')
 
-    cmd = ['find', '-L', dirpath,
-           '-maxdepth', str(depth)] + \
-           excludes_for_find + \
-           ['-name', '.git', 
-           '-print']
+    cmd += ['-name', '.git', '-print']
+    cmd = [utf8ify(s) for s in cmd]
+    try:
+        output = subprocess.check_output(cmd)
+    except Exception as err:
+        log.exception('failed: %r', err)
+        raise err
 
-    output = subprocess.check_output(cmd)
     output = [os.path.dirname(s.strip()) for s in decode(output).split('\n')
               if s.strip()]
 
@@ -101,8 +113,8 @@ def find_git_repos(dirpath, excludes, depth, user_id, group_ids, name_for_parent
         else:
             components = filepath.rstrip('/').split('/')
             if name_for_parent >= len(components):
-                log.warning(u'%s : `name_for_parent` is %d, but '
-                            u'only %d levels in file tree',
+                log.warning('%s : `name_for_parent` is %d, but '
+                            'only %d levels in file tree',
                             filepath, name_for_parent, len(components))
                 name = os.path.basename(filepath)
             else:
@@ -110,7 +122,7 @@ def find_git_repos(dirpath, excludes, depth, user_id, group_ids, name_for_parent
 
         results.append(Repo(name, filepath))
 
-    log.debug(u'%d repo(s) found in `%s` in %0.2fs', len(results), dirpath,
+    log.debug('%d repo(s) found in `%s` in %0.2fs', len(results), dirpath,
               time() - start)
 
     for r in results:
@@ -130,12 +142,12 @@ def main(wf):
                   'Nothing to update. Exiting.')
         return 0
 
-    user_id = os.getuid()
-    group_ids = os.getgroups()
+    uid = os.getuid()
+    gids = os.getgroups()
     global_excludes = wf.settings.get('global_exclude_patterns', [])
 
     repos = []
-    result_objs = []  # For AsyncResults objects returned by `apply_async`
+    results = []  # For AsyncResults objects returned by `apply_async`
     pool = Pool(CONCURRENT_SEARCHES)
 
     for data in search_dirs:
@@ -149,15 +161,15 @@ def main(wf):
             continue
 
         r = pool.apply_async(find_git_repos,
-                             (dirpath, excludes, depth, user_id, group_ids, name_for_parent))
-        result_objs.append(r)
+                             (dirpath, excludes, depth, uid, gids, name_for_parent))
+        results.append(r)
 
     # Close the pool and wait for it to finish
     pool.close()
     pool.join()
 
     # Retrieve results
-    for r in result_objs:
+    for r in results:
         repos += r.get()
 
     wf.cache_data('repos', repos)

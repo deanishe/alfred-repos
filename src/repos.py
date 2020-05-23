@@ -2,7 +2,6 @@
 # encoding: utf-8
 #
 # Copyright (c) 2013 deanishe@deanishe.net.
-#
 # MIT Licence. See http://opensource.org/licenses/MIT
 #
 # Created on 2013-11-04
