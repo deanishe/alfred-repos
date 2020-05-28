@@ -295,12 +295,17 @@ def do_search(repos, opts):
         int: Exit status.
 
     """
-    # Set modifier subtitles
     apps = get_apps()
     subtitles = {}
-
+    valid = {}
     for key, app in apps.items():
-        subtitles[key] = 'Open in {}'.format(join_english(app))
+        if not app:
+            subtitles[key] = ('App for ' + key + ' not set. '
+                              'Use `reposettings` to set it.')
+            valid[key] = False
+        else:
+            subtitles[key] = u'Open in {}'.format(join_english(app))
+            valid[key] = True
 
     if opts.query:
         repos = wf.filter(opts.query, repos, lambda t: t[0], min_score=30)
@@ -311,31 +316,22 @@ def do_search(repos, opts):
 
     for r in repos:
         log.debug(r)
-        short_path = r.path.replace(os.environ['HOME'], '~')
-        subtitle = u'{}  //  Open in {}'.format(short_path,
-                                                join_english(apps['default']))
         it = wf.add_item(
             r.name,
-            subtitle,
+            subtitles.get('default', ''),
             arg=r.path,
             uid=r.path,
-            valid=True,
+            valid=valid.get('default', False),
             type='file',
             icon='icon.png'
         )
         it.setvar('appkey', 'default')
 
-        for key, app in apps.items():
-            if not app:
-                subtitle = ('App for ' + key + ' not set. '
-                            'Use `reposettings` to set it.')
-                valid = False
-            else:
-                subtitle = u'Open in {}'.format(join_english(app))
-                valid = True
-
-            mod = it.add_modifier(key.replace('_', '+'), subtitle,
-                                  r.path, valid)
+        for key in apps:
+            if key == 'default':
+                continue
+            mod = it.add_modifier(key.replace('_', '+'), subtitles[key],
+                                  r.path, valid[key])
             mod.setvar('appkey', key)
 
     wf.send_feedback()
