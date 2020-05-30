@@ -314,11 +314,16 @@ def do_search(repos, opts):
     if not repos:
         wf.add_item('No matching repos found', icon=ICON_WARNING)
 
+    home = os.environ['HOME']
     for r in repos:
         log.debug(r)
+        pretty_path = subtitle = r.path.replace(home, '~')
+        app = subtitles.get('default')
+        if app:
+            subtitle += ' //  ' + app
         it = wf.add_item(
             r.name,
-            subtitles.get('default', ''),
+            subtitle,
             arg=r.path,
             uid=r.path,
             valid=valid.get('default', False),
@@ -330,8 +335,9 @@ def do_search(repos, opts):
         for key in apps:
             if key == 'default':
                 continue
-            mod = it.add_modifier(key.replace('_', '+'), subtitles[key],
-                                  r.path, valid[key])
+            mod = it.add_modifier(key.replace('_', '+'),
+                                  pretty_path + '  //  ' + subtitles[key],
+                                  arg=r.path, valid=valid[key])
             mod.setvar('appkey', key)
 
     wf.send_feedback()
