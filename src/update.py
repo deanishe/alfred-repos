@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # encoding: utf-8
 #
 # Copyright (c) 2014 deanishe@deanishe.net
@@ -12,7 +12,6 @@
 Uses settings from the workflow's `settings.json` file.
 """
 
-from __future__ import print_function, unicode_literals
 
 import sys
 import os
@@ -20,6 +19,9 @@ import subprocess
 from fnmatch import fnmatch
 from time import time
 from multiprocessing.dummy import Pool
+
+# setup access to the local .site-packages
+sys.path.insert(0, os.path.dirname(__file__) + "/.site-packages")  # noqa
 
 from workflow import Workflow3
 from workflow.util import utf8ify
@@ -157,7 +159,7 @@ def main(wf):
         name_for_parent = data.get('name_for_parent', 1)
 
         if not os.path.exists(dirpath):
-            log.error(u'directory does not exist: %s', dirpath)
+            log.error('directory does not exist: %s', dirpath)
             continue
 
         r = pool.apply_async(find_git_repos,

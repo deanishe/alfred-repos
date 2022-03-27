@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# encoding: utf-8
+#!/usr/bin/env python3
 #
 # Copyright (c) 2013 deanishe@deanishe.net.
 # MIT Licence. See http://opensource.org/licenses/MIT
@@ -22,7 +21,6 @@ Options:
 
 """
 
-from __future__ import print_function
 
 from collections import namedtuple
 import os
@@ -30,6 +28,9 @@ import re
 import subprocess
 import sys
 import time
+
+# setup access to the local .site-packages
+sys.path.insert(0, os.path.dirname(__file__) + "/.site-packages")  # noqa
 
 from workflow import Workflow3, ICON_WARNING, ICON_INFO
 from workflow.background import is_running, run_in_background
@@ -143,16 +144,16 @@ def settings_updated():
 
 def join_english(items):
     """Join a list of unicode objects with commas and/or 'and'."""
-    if isinstance(items, unicode):
+    if isinstance(items, str):
         return items
 
     if len(items) == 1:
-        return unicode(items[0])
+        return str(items[0])
 
     elif len(items) == 2:
-        return u' and '.join(items)
+        return ' and '.join(items)
 
-    return u', '.join(items[:-1]) + u' and {}'.format(items[-1])
+    return ', '.join(items[:-1]) + ' and {}'.format(items[-1])
 
 
 def get_apps():
@@ -176,7 +177,7 @@ def get_apps():
         apps[key] = app
 
     if not apps.get('default'):  # Things will break if this isn't set
-        apps['default'] = u'Finder'
+        apps['default'] = 'Finder'
 
     return apps
 
@@ -201,7 +202,7 @@ def get_repos(opts):
         return []
 
     # Check if cached data is old version
-    if isinstance(repos[0], basestring):
+    if isinstance(repos[0], str):
         do_update()
         return []
 
@@ -237,7 +238,7 @@ def do_open(opts):
     all_apps = get_apps()
     apps = all_apps.get(opts.appkey)
     if apps is None:
-        print('App {} not set. Use `reposettings`'.format(opts.appkey))
+        print(('App {} not set. Use `reposettings`'.format(opts.appkey)))
         return 0
 
     if not isinstance(apps, list):
@@ -280,7 +281,7 @@ def do_update():
         int: Exit status.
 
     """
-    run_in_background('update', ['/usr/bin/python', 'update.py'])
+    run_in_background('update', ['/usr/bin/env', 'python3', 'update.py'])
     return 0
 
 
@@ -304,12 +305,12 @@ def do_search(repos, opts):
                               'Use `reposettings` to set it.')
             valid[key] = False
         else:
-            subtitles[key] = u'Open in {}'.format(join_english(app))
+            subtitles[key] = 'Open in {}'.format(join_english(app))
             valid[key] = True
 
     if opts.query:
         repos = wf.filter(opts.query, repos, lambda t: t[0], min_score=30)
-        log.info(u'%d/%d repos match `%s`', len(repos), len(repos), opts.query)
+        log.info('%d/%d repos match `%s`', len(repos), len(repos), opts.query)
 
     if not repos:
         wf.add_item('No matching repos found', icon=ICON_WARNING)
@@ -361,7 +362,7 @@ def parse_args():
                                     DEFAULT_UPDATE_INTERVAL)) * 60
 
     opts = AttrDict(
-        query=(args.get('<query>') or u'').strip(),
+        query=(args.get('<query>') or '').strip(),
         path=args.get('<path>'),
         appkey=args.get('<appkey>') or 'default',
         update_interval=update_interval,
@@ -397,8 +398,8 @@ def main(wf):
     # Notify user if update is available
     # ------------------------------------------------------------------
     if wf.update_available:
-        wf.add_item(u'Workflow Update is Available',
-                    u'↩ or ⇥ to install',
+        wf.add_item('Workflow Update is Available',
+                    '↩ or ⇥ to install',
                     autocomplete='workflow:update',
                     valid=False,
                     icon=ICON_UPDATE)
@@ -427,7 +428,7 @@ def main(wf):
     # ------------------------------------------------------------------
     if not repos:
         if is_running('update'):
-            wf.add_item(u'Updating list of repos…',
+            wf.add_item('Updating list of repos…',
                         'Should be done in a few seconds',
                         icon=ICON_INFO)
             wf.rerun = 0.5

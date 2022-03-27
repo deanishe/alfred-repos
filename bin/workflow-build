@@ -1,0 +1,345 @@
+#!/usr/bin/python3
+# encoding: utf-8
+#
+# Copyright (c) 2013 deanishe@deanishe.net.
+#
+# MIT Licence. See http://opensource.org/licenses/MIT
+#
+# Created on 2013-11-01
+# https://gist.github.com/deanishe/b16f018119ef3fe951af
+
+"""workflow-build [options] <workflow-dir>
+
+Build Alfred Workflows.
+
+Compile contents of <workflow-dir> to a ZIP file (with extension
+`.alfredworkflow`).
+
+The name of the output file is generated from the workflow name,
+which is extracted from the workflow's `info.plist`. If a `version`
+file is contained within the workflow directory, it's contents
+will be appended to the compiled workflow's filename.
+
+Usage:
+    workflow-build [-v|-q|-d] [-f] [-o <outputdir>] <workflow-dir>...
+    workflow-build (-h|--version)
+
+Options:
+    -o, --output=<outputdir>    directory to save workflow(s) to
+                                default is current working directory
+    -f, --force                 overwrite existing files
+    -h, --help                  show this message and exit
+    -V, --version               show version number and exit
+    -q, --quiet                 only show errors and above
+    -v, --verbose               show info messages and above
+    -d, --debug                 show debug messages
+
+"""
+
+from __future__ import print_function
+
+import logging
+import os
+import plistlib
+import shutil
+import string
+import sys
+from pathlib import Path
+from contextlib import contextmanager
+from subprocess import CalledProcessError, check_call
+from tempfile import mkdtemp
+from uuid import UUID, uuid5
+from hashlib import md5
+
+__version__ = "0.6"
+__author__ = "Dean Jackson <deanishe@deanishe.net>"
+
+DEFAULT_LOG_LEVEL = logging.WARNING
+
+# Characters permitted in workflow filenames
+OK_CHARS = set(string.ascii_letters + string.digits + "-.")
+
+EXCLUDE_PATTERNS = [
+    # '.*',
+    "*.pyc",
+    "*.log",
+    "*.acorn",
+    "*.swp",
+    "*.bak",
+    "*.sublime-project",
+    "*.sublime-workflow",
+    "*.git",
+    "*.dist-info",
+    "*.egg-info",
+    "__pycache__",
+]
+
+log = logging.getLogger("[%(levelname)s] %(message)s")
+logging.basicConfig(format="", level=logging.DEBUG)
+
+
+@contextmanager
+def chdir(dirpath):
+    """Context-manager to change working directory."""
+    startdir = os.path.abspath(os.curdir)
+    os.chdir(dirpath)
+    log.debug("cwd=%s", dirpath)
+
+    yield
+
+    os.chdir(startdir)
+    log.debug("cwd=%s", startdir)
+
+
+@contextmanager
+def tempdir():
+    """Context-manager to create and cd to a temporary directory."""
+    startdir = os.path.abspath(os.curdir)
+    dirpath = mkdtemp()
+    try:
+        yield Path(dirpath)
+    finally:
+        shutil.rmtree(dirpath)
+
+
+def uuid(namespace, name):
+    seed = UUID(md5(namespace.encode("utf8")).hexdigest())
+    return str(uuid5(seed, name)).upper()
+
+
+def update_plist(
+    workflow_dir,
+    name,
+    version=None,
+    createdby=None,
+    bundleid=None,
+    disabled=None,
+    webaddress=None,
+    readme=None,
+    description=None,
+):
+    with open(workflow_dir / "info.plist", "rb") as f:
+        info = plistlib.load(f)
+
+    info["name"] = name
+
+    if version:
+        info["version"] = version
+    if createdby:
+        info["createdby"] = createdby
+    if bundleid:
+        info["bundleid"] = bundleid.lower()
+    if disabled:
+        info["disabled"] = disabled
+    if webaddress:
+        info["webaddress"] = webaddress.lower()
+
+    info["objects"][0]["config"]["keyword"] = name
+    info["objects"][0]["uid"] = uuid(name, "entrypoint")
+
+    readme = Path(readme or "")
+    info["readme"] = readme.read_text().strip() if readme.is_file() else ""
+
+    desc = Path(description or "")
+    info["description"] = desc.read_text().strip() if desc.is_file() else ""
+
+    with open(workflow_dir / "info.plist", "wb") as f:
+        plistlib.dump(info, f)
+
+
+def build_workflow(
+    workflow_dir,
+    outputdir,
+    overwrite=False,
+    verbose=False,
+    name=None,
+):
+    """Create an .alfredworkflow file from the contents of `workflow_dir`."""
+
+    with tempdir() as dirpath:
+        tmpdir = dirpath / "workflow"
+        shutil.copytree(
+            workflow_dir, tmpdir, ignore=shutil.ignore_patterns(*EXCLUDE_PATTERNS)
+        )
+
+        with chdir(tmpdir):
+            # ------------------------------------------------------------
+            # Read workflow metadata from info.plist
+
+            with open(workflow_dir / "info.plist", "rb") as f:
+                info = plistlib.load(f)
+
+            zippath = os.path.join(outputdir, name)
+            if info.get("version"):
+                zippath = "{}-{}".format(zippath, info["version"])
+            zippath += ".alfredworkflow"
+
+            # ------------------------------------------------------------
+            # Remove unexported vars from info.plist
+
+            for k in info.get("variablesdontexport", {}):
+                info["variables"][k] = ""
+
+            with open("info.plist", "wb") as f:
+                plistlib.dump(info, f)
+
+            # ------------------------------------------------------------
+            # Build workflow
+            if os.path.exists(zippath):
+                if overwrite:
+                    log.info("overwriting existing workflow")
+                    os.unlink(zippath)
+                else:
+                    log.error('File "%s" exists. Use -f to overwrite', zippath)
+                    return False
+
+            # build workflow
+            command = ["zip", "-r"]
+            if not verbose:
+                command.append("-q")
+
+            command.extend([zippath, "."])
+
+            log.debug("command=%r", command)
+
+            try:
+                check_call(command)
+            except CalledProcessError as err:
+                log.error("zip exited with %d", err.returncode)
+                return False
+
+            log.info("wrote %s", zippath)
+
+    return True
+
+
+def main(args=None):
+    """Run CLI."""
+    # ------------------------------------------------------------
+    # CLI flags
+    from argparse import ArgumentParser
+
+    parser = ArgumentParser()
+    parser.add_argument(
+        "-o",
+        "--output",
+        default=os.curdir,
+        help="directory to save workflow(s) to",
+    )
+    parser.add_argument(
+        "-f",
+        "--force",
+        action="store_true",
+        help="overwrite existing files",
+    )
+    parser.add_argument(
+        "-q",
+        "--quiet",
+        action="store_true",
+        help="only show errors and above",
+    )
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="show info messages and above",
+    )
+    parser.add_argument(
+        "-d",
+        "--debug",
+        action="store_true",
+        help="show debug messages",
+    )
+    parser.add_argument(
+        "--name",
+        help="set the name value",
+    )
+    parser.add_argument(
+        "--version",
+        help="set the version value",
+    )
+    parser.add_argument(
+        "--createdby",
+        help="set the createdby value",
+    )
+    parser.add_argument(
+        "--bundleid",
+        help="set the bundleid value",
+    )
+    parser.add_argument(
+        "--disabled",
+        help="set the disabled value",
+        default="False",
+    )
+    parser.add_argument(
+        "--webaddress",
+        help="set the webaddress value",
+    )
+    parser.add_argument(
+        "--readme",
+        help="set the readme value",
+        default="readme.md",
+    )
+    parser.add_argument(
+        "--description",
+        help="set the description value",
+        default="description.md",
+    )
+    parser.add_argument(
+        "workflow_dir",
+        nargs="+",
+        default=[],
+        help="dir to process",
+    )
+
+    args = parser.parse_args()
+
+    if args.verbose:
+        log.setLevel(logging.INFO)
+    elif args.quiet:
+        log.setLevel(logging.ERROR)
+    elif args.debug:
+        log.setLevel(logging.DEBUG)
+    else:
+        log.setLevel(DEFAULT_LOG_LEVEL)
+
+    log.debug("log level=%s", logging.getLevelName(log.level))
+    log.debug("args=%r", args)
+
+    # Build options
+    force = args.force
+    outputdir = os.path.abspath(args.output)
+    workflow_dirs = [os.path.abspath(p) for p in args.workflow_dir]
+    verbose = log.level == logging.DEBUG
+
+    log.debug("outputdir=%r, workflow_dirs=%r", outputdir, workflow_dirs)
+
+    # ------------------------------------------------------------
+    # Build workflow(s)
+    errors = False
+    for path in workflow_dirs:
+        update_plist(
+            Path(path),
+            name=args.name,
+            version=args.version,
+            createdby=args.createdby,
+            bundleid=args.bundleid,
+            disabled=(args.disabled or "").lower() in ("1", "true"),
+            webaddress=args.webaddress,
+            readme=args.readme,
+            description=args.description,
+        )
+        ok = build_workflow(
+            Path(path), Path(outputdir), args.force, verbose, name=args.name
+        )
+        if not ok:
+            errors = True
+
+    if errors:
+        return 1
+
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))
