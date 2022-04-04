@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env /usr/local/bin/python2
 # encoding: utf-8
 #
 # Copyright (c) 2013 deanishe@deanishe.net.
@@ -280,7 +280,7 @@ def do_update():
         int: Exit status.
 
     """
-    run_in_background('update', ['/usr/bin/python', 'update.py'])
+    run_in_background('update', ['/usr/local/bin/python2', 'update.py'])
     return 0
 
 
