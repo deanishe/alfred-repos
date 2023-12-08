@@ -1,5 +1,0 @@
-Features:
-	- make it go faster! @done(14-07-04 22:01)
-		- otherwise, use manual reload @done(14-07-04 22:01)
-	- add scope (list of directories) @done(14-07-04 22:01)
-	- add excludes (using glob patterns) @done(14-07-04 22:01)
