@@ -32,7 +32,7 @@ src: PACKAGES=-r requirements.txt
 src: src-build
 
 # install bin/.site-packages
-bin: PACKAGES=pip-tools==5.5.0
+bin: PACKAGES=pip-tools==7.3.0
 bin: bin/.site-packages
 
 pip-compile: bin
